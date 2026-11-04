@@ -225,7 +225,7 @@
             }
 
             function initGameVars() {
-                arena = makeMatrix(12, 22);
+                arena = makeMatrix(10, 20);
                 queue = [];
                 refillQueue();
                 player.score = 0;
@@ -238,8 +238,15 @@
                 const [m, o] = [pl.matrix, pl.pos];
                 for (let y = 0; y < m.length; ++y) {
                     for (let x = 0; x < m[y].length; ++x) {
-                        if (m[y][x] !== 0 && (ar[y + o.y] && ar[y + o.y][x + o.x]) !== 0) {
-                            return true;
+                        if (m[y][x] !== 0) {
+                            let newX = x + o.x;
+                            let newY = y + o.y;
+                            if (newX < 0 || newX >= ar[0].length || newY >= ar.length) {
+                                return true;
+                            }
+                            if (newY >= 0 && ar[newY][newX] !== 0) {
+                                return true;
+                            }
                         }
                     }
                 }
@@ -532,7 +539,7 @@
                     ctx = canvas.getContext('2d');
                 }
                 if (ctx) {
-                    ctx.scale(15, 15);
+                    ctx.scale(20, 20);
                 }
 
                 const c1 = document.getElementById('nextCanvas1');
@@ -542,11 +549,11 @@
                 if (c2) nextCtx2 = c2.getContext('2d');
                 if (c3) nextCtx3 = c3.getContext('2d');
 
-                if (nextCtx1) nextCtx1.scale(7.5, 7.5);
-                if (nextCtx2) nextCtx2.scale(6, 6);
-                if (nextCtx3) nextCtx3.scale(4.5, 4.5);
+                if (nextCtx1) nextCtx1.scale(10, 10);
+                if (nextCtx2) nextCtx2.scale(8, 8);
+                if (nextCtx3) nextCtx3.scale(6, 6);
 
-                arena = makeMatrix(14, 28);
+                arena = makeMatrix(10, 20);
                 refillQueue();
                 player.matrix = getPiece(queue[0]);
                 renderScene();
