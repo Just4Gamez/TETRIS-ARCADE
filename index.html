@@ -51,7 +51,7 @@
     <!-- Kanvas Utama Permainan -->
     <main class="flex flex-col items-center justify-center w-full max-w-sm px-1 gap-1.5">
         <div class="relative flex items-center justify-center p-1 bg-slate-900/95 border-2 border-purple-500/50 rounded-2xl shadow-[0_0_20px_rgba(168,85,247,0.3)]">
-            <canvas id="tetris" width="220" height="440" class="bg-slate-950 rounded-xl shadow-inner w-[200px] h-[400px] sm:w-[220px] sm:h-[440px]"></canvas>
+            <canvas id="tetris" width="200" height="400" class="bg-slate-950 rounded-xl shadow-inner w-[160px] h-[320px] sm:w-[200px] sm:h-[400px]"></canvas>
 
             <!-- Skrin Mula / Tamat -->
             <div id="game-overlay" class="absolute inset-0 bg-slate-950/95 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center p-3 text-center z-10">
@@ -539,7 +539,7 @@
                     ctx = canvas.getContext('2d');
                 }
                 if (ctx) {
-                    ctx.scale(22, 22);
+                    ctx.scale(12, 12); // Saiz petak dikecilkan lagi kepada saiz sederhana yang selesa
                 }
 
                 const c1 = document.getElementById('nextCanvas1');
