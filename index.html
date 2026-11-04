@@ -51,7 +51,7 @@
     <!-- Kanvas Utama Permainan -->
     <main class="flex flex-col items-center justify-center w-full max-w-sm px-1 gap-1.5">
         <div class="relative flex items-center justify-center p-1 bg-slate-900/95 border-2 border-purple-500/50 rounded-2xl shadow-[0_0_20px_rgba(168,85,247,0.3)]">
-            <canvas id="tetris" width="220" height="280" class="bg-slate-950 rounded-xl shadow-inner w-[200px] h-[254px] sm:w-[220px] sm:h-[280px]"></canvas>
+            <canvas id="tetris" width="220" height="440" class="bg-slate-950 rounded-xl shadow-inner w-[200px] h-[400px] sm:w-[220px] sm:h-[440px]"></canvas>
 
             <!-- Skrin Mula / Tamat -->
             <div id="game-overlay" class="absolute inset-0 bg-slate-950/95 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center p-3 text-center z-10">
@@ -225,13 +225,13 @@
             }
 
             function initGameVars() {
-                arena = makeMatrix(12, 16);
+                arena = makeMatrix(12, 22);
                 queue = [];
                 refillQueue();
                 player.score = 0;
                 player.lines = 0;
                 player.level = 1;
-                dropInterval = 1000;
+                dropInterval = 1200;
             }
 
             function checkCollide(ar, pl) {
@@ -298,7 +298,7 @@
                     player.score += pts[count] * player.level;
                     player.lines += count;
                     player.level = Math.min(99, Math.floor(player.lines / 8) + 1);
-                    dropInterval = Math.max(80, 1000 - (player.level - 1) * 10);
+                    dropInterval = Math.max(80, 1200 - (player.level - 1) * 11);
                     updateScoreDisplay();
                 }
             }
@@ -365,11 +365,11 @@
 
                 ctx.strokeStyle = 'rgba(168, 85, 247, 0.15)';
                 ctx.lineWidth = 0.04;
-                for (let i = 0; i <= canvas.width / 20; i++) {
-                    ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height / 20); ctx.stroke();
+                for (let i = 0; i <= canvas.width / 15; i++) {
+                    ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height / 15); ctx.stroke();
                 }
-                for (let j = 0; j <= canvas.height / 20; j++) {
-                    ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(canvas.width / 20, j); ctx.stroke();
+                for (let j = 0; j <= canvas.height / 15; j++) {
+                    ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(canvas.width / 15, j); ctx.stroke();
                 }
 
                 drawBlock(arena, { x: 0, y: 0 }, ctx);
@@ -532,7 +532,7 @@
                     ctx = canvas.getContext('2d');
                 }
                 if (ctx) {
-                    ctx.scale(20, 20);
+                    ctx.scale(15, 15);
                 }
 
                 const c1 = document.getElementById('nextCanvas1');
@@ -542,11 +542,11 @@
                 if (c2) nextCtx2 = c2.getContext('2d');
                 if (c3) nextCtx3 = c3.getContext('2d');
 
-                if (nextCtx1) nextCtx1.scale(10, 10);
-                if (nextCtx2) nextCtx2.scale(8, 8);
-                if (nextCtx3) nextCtx3.scale(6, 6);
+                if (nextCtx1) nextCtx1.scale(7.5, 7.5);
+                if (nextCtx2) nextCtx2.scale(6, 6);
+                if (nextCtx3) nextCtx3.scale(4.5, 4.5);
 
-                arena = makeMatrix(12, 16);
+                arena = makeMatrix(14, 28);
                 refillQueue();
                 player.matrix = getPiece(queue[0]);
                 renderScene();
