@@ -74,36 +74,37 @@
                 <canvas id="nextCanvas3" width="25" height="20" class="bg-slate-950/40 rounded-lg border border-purple-500/10 opacity-50"></canvas>
             </div>
             
-            <div onclick="window.toggleGamePause()" class="flex flex-col items-center justify-center bg-indigo-950/90 border border-purple-500/40 px-2 py-0.5 rounded-lg cursor-pointer active:scale-95 shadow-inner">
+            <div onclick="window.toggleGamePause()" class="flex flex-col items-center justify-center bg-indigo-950/90 border border-purple-500/40 px-2.5 py-1 rounded-lg cursor-pointer active:scale-95 shadow-inner">
                 <span id="pause-label" class="text-[7px] font-bold tracking-widest text-pink-300 uppercase">JEDA</span>
-                <svg class="w-3.5 h-3.5 text-pink-300 mt-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <svg class="w-4 h-4 text-pink-300 mt-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             </div>
 
-            <div class="bg-indigo-950/80 border border-purple-500/30 px-2 py-0.5 rounded-lg text-center shadow-inner">
+            <div class="bg-indigo-950/80 border border-purple-500/30 px-2.5 py-0.5 rounded-lg text-center shadow-inner">
                 <span class="text-[7px] font-bold tracking-widest text-purple-300 block uppercase">TAHAP</span>
-                <span id="level" class="retro-font text-amber-300 text-[10px]">1</span>
+                <!-- Updated level display format up to Level 99 -->
+                <span id="level" class="retro-font text-amber-300 text-[10px]">1/99</span>
                 <span id="next-level-info" class="text-[6px] text-purple-300/80 block">2,000 pts</span>
             </div>
         </div>
     </main>
 
-    <!-- Bar Kawalan Bawah -->
-    <nav class="w-full max-w-md px-3 pb-1">
-        <div class="grid grid-cols-5 gap-2 bg-slate-900/90 p-2 rounded-2xl border border-purple-500/30 shadow-2xl backdrop-blur-md">
-            <button onclick="window.actionMove(-1)" class="flex flex-col items-center justify-center bg-gradient-to-b from-slate-800 to-slate-900 active:from-purple-600 active:to-indigo-600 text-purple-300 active:text-white py-3.5 rounded-xl border border-slate-700/80 shadow-md active:scale-95 transition-all">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
+    <!-- Bar Kawalan Bawah - Butang Lebih Besar & Selesa -->
+    <nav class="w-full max-w-md px-3 pb-2">
+        <div class="grid grid-cols-5 gap-2.5 bg-slate-900/95 p-2.5 rounded-2xl border border-purple-500/40 shadow-2xl backdrop-blur-md">
+            <button onclick="window.actionMove(-1)" class="flex flex-col items-center justify-center bg-gradient-to-b from-slate-800 to-slate-900 active:from-purple-600 active:to-indigo-600 text-purple-300 active:text-white py-4 rounded-2xl border border-slate-700/80 shadow-lg active:scale-95 transition-all">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
             </button>
-            <button onclick="window.actionRotate()" class="flex flex-col items-center justify-center bg-gradient-to-b from-purple-600 to-indigo-700 active:from-purple-500 text-white py-3.5 rounded-xl border border-purple-400/40 shadow-md active:scale-95 transition-all">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+            <button onclick="window.actionRotate()" class="flex flex-col items-center justify-center bg-gradient-to-b from-purple-600 to-indigo-700 active:from-purple-500 text-white py-4 rounded-2xl border border-purple-400/40 shadow-lg active:scale-95 transition-all">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
             </button>
-            <button onclick="window.actionSoftDrop()" class="flex flex-col items-center justify-center bg-gradient-to-b from-slate-800 to-slate-900 active:from-indigo-600 text-indigo-300 active:text-white py-3.5 rounded-xl border border-indigo-700/60 shadow-md active:scale-95 transition-all">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+            <button onclick="window.actionSoftDrop()" class="flex flex-col items-center justify-center bg-gradient-to-b from-slate-800 to-slate-900 active:from-indigo-600 text-indigo-300 active:text-white py-4 rounded-2xl border border-indigo-700/60 shadow-lg active:scale-95 transition-all">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
             </button>
-            <button onclick="window.actionHardDrop()" class="flex flex-col items-center justify-center bg-gradient-to-b from-amber-500 to-orange-600 active:from-amber-400 text-white py-3.5 rounded-xl border border-amber-300/40 shadow-md active:scale-95 transition-all">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 13l-7 7-7-7m14-8l-7 7-7-7"></path></svg>
+            <button onclick="window.actionHardDrop()" class="flex flex-col items-center justify-center bg-gradient-to-b from-amber-500 to-orange-600 active:from-amber-400 text-white py-4 rounded-2xl border border-amber-300/40 shadow-lg active:scale-95 transition-all">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="3.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 13l-7 7-7-7m14-8l-7 7-7-7"></path></svg>
             </button>
-            <button onclick="window.actionMove(1)" class="flex flex-col items-center justify-center bg-gradient-to-b from-slate-800 to-slate-900 active:from-purple-600 text-purple-300 active:text-white py-3.5 rounded-xl border border-slate-700/80 shadow-md active:scale-95 transition-all">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
+            <button onclick="window.actionMove(1)" class="flex flex-col items-center justify-center bg-gradient-to-b from-slate-800 to-slate-900 active:from-purple-600 text-purple-300 active:text-white py-4 rounded-2xl border border-slate-700/80 shadow-lg active:scale-95 transition-all">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
             </button>
         </div>
     </nav>
@@ -226,7 +227,7 @@
                 player.score = 0;
                 player.lines = 0;
                 player.level = 1;
-                dropInterval = 1000;
+                dropInterval = 1500; // Bermula perlahan (1.5 saat pada Tahap 1)
             }
 
             function checkCollide(ar, pl) {
@@ -292,8 +293,9 @@
                     const pts = [0, 40, 100, 300, 1200];
                     player.score += pts[count] * player.level;
                     player.lines += count;
-                    player.level = Math.floor(player.lines / 10) + 1;
-                    dropInterval = Math.max(100, 1000 - (player.level - 1) * 90);
+                    // Expanded maximum level up to 99
+                    player.level = Math.min(99, Math.floor(player.lines / 8) + 1);
+                    dropInterval = Math.max(80, 1500 - (player.level - 1) * 14);
                     updateScoreDisplay();
                 }
             }
@@ -406,7 +408,7 @@
                 const nxtInfo = document.getElementById('next-level-info');
                 
                 if (sEl) sEl.innerText = `Skor: ${player.score}`;
-                if (lEl) lEl.innerText = player.level;
+                if (lEl) lEl.innerText = `${player.level}/99`;
                 
                 // Kira mata berbaki untuk sasaran 2,000 mata
                 const remaining = Math.max(0, 2000 - player.score);
