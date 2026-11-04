@@ -51,7 +51,7 @@
     <!-- Kanvas Utama Permainan -->
     <main class="flex flex-col items-center justify-center w-full max-w-sm px-1 gap-1.5">
         <div class="relative flex items-center justify-center p-1 bg-slate-900/95 border-2 border-purple-500/50 rounded-2xl shadow-[0_0_20px_rgba(168,85,247,0.3)]">
-            <canvas id="tetris" width="200" height="400" class="bg-slate-950 rounded-xl shadow-inner w-[160px] h-[320px] sm:w-[200px] sm:h-[400px]"></canvas>
+            <canvas id="tetris" width="180" height="360" class="bg-slate-950 rounded-xl shadow-inner w-[160px] h-[320px] sm:w-[180px] sm:h-[360px]"></canvas>
 
             <!-- Skrin Mula / Tamat -->
             <div id="game-overlay" class="absolute inset-0 bg-slate-950/95 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center p-3 text-center z-10">
@@ -225,7 +225,7 @@
             }
 
             function initGameVars() {
-                arena = makeMatrix(10, 20);
+                arena = makeMatrix(15, 30);
                 queue = [];
                 refillQueue();
                 player.score = 0;
@@ -372,11 +372,11 @@
 
                 ctx.strokeStyle = 'rgba(168, 85, 247, 0.15)';
                 ctx.lineWidth = 0.04;
-                for (let i = 0; i <= canvas.width / 15; i++) {
-                    ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height / 15); ctx.stroke();
+                for (let i = 0; i <= canvas.width / 12; i++) {
+                    ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height / 12); ctx.stroke();
                 }
-                for (let j = 0; j <= canvas.height / 15; j++) {
-                    ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(canvas.width / 15, j); ctx.stroke();
+                for (let j = 0; j <= canvas.height / 12; j++) {
+                    ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(canvas.width / 12, j); ctx.stroke();
                 }
 
                 drawBlock(arena, { x: 0, y: 0 }, ctx);
@@ -539,7 +539,7 @@
                     ctx = canvas.getContext('2d');
                 }
                 if (ctx) {
-                    ctx.scale(12, 12); // Saiz petak dikecilkan lagi kepada saiz sederhana yang selesa
+                    ctx.scale(12, 12); // Memastikan skala padan sepenuhnya dengan saiz fizikal kanvas 180x360
                 }
 
                 const c1 = document.getElementById('nextCanvas1');
@@ -553,7 +553,7 @@
                 if (nextCtx2) nextCtx2.scale(8, 8);
                 if (nextCtx3) nextCtx3.scale(6, 6);
 
-                arena = makeMatrix(10, 20);
+                arena = makeMatrix(15, 30);
                 refillQueue();
                 player.matrix = getPiece(queue[0]);
                 renderScene();
