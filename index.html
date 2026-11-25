@@ -3,246 +3,282 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NEO TETRIS</title>
+<title>NEON TETRIS</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&family=JetBrains+Mono:wght@600;800&display=swap" rel="stylesheet">
+
 <style>
   :root {
-    --bg: #070a13;
-    --panel: rgba(17, 24, 39, .72);
-    --border: rgba(56, 189, 248, .18);
-    --accent: #22d3ee;
-    --accent-2: #a78bfa;
+    --cyan: #22d3ee;
+    --violet: #8b5cf6;
+    --pink: #f472b6;
   }
 
   * { -webkit-tap-highlight-color: transparent; }
 
   body {
-    font-family: 'Inter', sans-serif;
-    background:
-      radial-gradient(900px 500px at 15% 10%, rgba(34,211,238,.14), transparent 60%),
-      radial-gradient(800px 500px at 85% 90%, rgba(167,139,250,.16), transparent 60%),
-      var(--bg);
-    color: #e2e8f0;
+    font-family: 'Sora', sans-serif;
+    color: #e7ecf5;
+    background: #05060c;
+    overflow-x: hidden;
     touch-action: manipulation;
   }
 
-  .display-font {
-    font-family: 'Space Grotesk', sans-serif;
-    letter-spacing: -.02em;
+  .bg-fx {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background:
+      radial-gradient(700px 420px at 12% 8%, rgba(34,211,238,.20), transparent 60%),
+      radial-gradient(800px 500px at 88% 88%, rgba(139,92,246,.22), transparent 62%),
+      radial-gradient(600px 400px at 50% 50%, rgba(244,114,182,.08), transparent 65%),
+      linear-gradient(180deg, #05060c 0%, #070912 100%);
   }
 
-  .glass {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    backdrop-filter: blur(18px);
-    box-shadow: 0 20px 60px rgba(2,6,23,.55), inset 0 1px 0 rgba(255,255,255,.06);
+  .bg-grid {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background-image:
+      linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+    background-size: 42px 42px;
+    mask-image: radial-gradient(circle at center, black 10%, transparent 78%);
   }
 
-  .stat-value {
-    font-family: 'Space Grotesk', sans-serif;
-    font-weight: 700;
+  .mono {
+    font-family: 'JetBrains Mono', monospace;
     font-variant-numeric: tabular-nums;
   }
 
-  .board-frame {
-    background: linear-gradient(180deg, rgba(15,23,42,.92), rgba(2,6,23,.96));
-    border: 1px solid rgba(56,189,248,.25);
+  .glass {
+    background: linear-gradient(160deg, rgba(255,255,255,.07), rgba(255,255,255,.02));
+    border: 1px solid rgba(255,255,255,.09);
+    backdrop-filter: blur(20px);
+    box-shadow:
+      0 20px 60px rgba(0,0,0,.45),
+      inset 0 1px 0 rgba(255,255,255,.08);
+  }
+
+  .board-wrap {
+    background:
+      linear-gradient(180deg, rgba(10,14,25,.95), rgba(4,6,12,.98));
+    border: 1px solid rgba(255,255,255,.10);
     box-shadow:
       0 0 0 1px rgba(255,255,255,.03) inset,
-      0 30px 80px rgba(2,6,23,.75),
-      0 0 60px rgba(34,211,238,.10);
+      0 35px 90px rgba(0,0,0,.65),
+      0 0 90px rgba(34,211,238,.10),
+      0 0 110px rgba(139,92,246,.08);
+  }
+
+  .chip {
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.08);
+    backdrop-filter: blur(16px);
+  }
+
+  .progress {
+    background: rgba(255,255,255,.08);
+    box-shadow: inset 0 2px 6px rgba(0,0,0,.45);
+  }
+
+  .progress-fill {
+    background: linear-gradient(90deg, var(--cyan), var(--violet), var(--pink));
+    box-shadow: 0 0 20px rgba(139,92,246,.65);
+    transition: width .35s cubic-bezier(.22,1,.36,1);
+  }
+
+  .btn {
+    background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.03));
+    border: 1px solid rgba(255,255,255,.12);
+    color: #dbeafe;
+    transition: transform .12s ease, background .2s ease, border-color .2s ease, color .2s ease;
+  }
+
+  .btn:active {
+    transform: scale(.92);
+    background: linear-gradient(180deg, rgba(34,211,238,.30), rgba(139,92,246,.20));
+    border-color: rgba(34,211,238,.60);
+    color: white;
+  }
+
+  .start-btn {
+    background: linear-gradient(120deg, #22d3ee, #6366f1 48%, #d946ef);
+    box-shadow:
+      0 16px 40px rgba(99,102,241,.35),
+      0 0 0 1px rgba(255,255,255,.15) inset;
+    transition: transform .15s ease, filter .2s ease;
+  }
+
+  .start-btn:active {
+    transform: scale(.95);
+    filter: brightness(1.1);
   }
 
   canvas {
     image-rendering: pixelated;
-    border-radius: 14px;
+    border-radius: 16px;
   }
 
-  .control-btn {
-    background: linear-gradient(180deg, rgba(30,41,59,.9), rgba(15,23,42,.9));
-    border: 1px solid rgba(148,163,184,.16);
-    color: #cbd5e1;
-    transition: transform .12s ease, background .2s ease, border-color .2s ease, color .2s ease;
-  }
-  .control-btn:active {
-    transform: scale(.94);
-    background: linear-gradient(180deg, rgba(34,211,238,.25), rgba(14,165,233,.18));
-    border-color: rgba(34,211,238,.55);
-    color: #fff;
-  }
-
-  .primary-btn {
-    background: linear-gradient(135deg, #22d3ee, #6366f1 55%, #a855f7);
-    box-shadow: 0 12px 35px rgba(34,211,238,.25);
-    transition: transform .15s ease, box-shadow .2s ease, filter .2s ease;
-  }
-  .primary-btn:hover { filter: brightness(1.08); }
-  .primary-btn:active { transform: scale(.96); }
-
-  .progress-track {
-    background: rgba(148,163,184,.12);
-    box-shadow: inset 0 1px 3px rgba(0,0,0,.5);
-  }
-
-  .progress-fill {
-    background: linear-gradient(90deg, #22d3ee, #818cf8, #c084fc);
-    box-shadow: 0 0 18px rgba(129,140,248,.55);
-    transition: width .3s cubic-bezier(.22,1,.36,1);
+  .glow-text {
+    text-shadow:
+      0 0 18px rgba(34,211,238,.45),
+      0 0 35px rgba(139,92,246,.30);
   }
 
   @media (min-width: 1024px) {
-    .game-shell {
+    .desktop-grid {
       display: grid;
-      grid-template-columns: 270px minmax(320px, 430px) 270px;
+      grid-template-columns: 250px minmax(330px, 420px) 250px;
+      gap: 20px;
       align-items: start;
-      gap: 22px;
     }
   }
 </style>
 </head>
 
-<body class="min-h-[100dvh] w-full flex flex-col items-center justify-center p-3 sm:p-5 select-none">
+<body class="min-h-[100dvh] flex flex-col items-center justify-center p-3 sm:p-5 select-none">
+<div class="bg-fx"></div>
+<div class="bg-grid"></div>
 
-<div class="w-full max-w-6xl flex flex-col gap-4">
+<div class="w-full max-w-6xl flex flex-col gap-3">
 
-  <!-- Header -->
-  <header class="glass rounded-2xl px-4 sm:px-6 py-3 flex items-center justify-between">
+  <!-- Top bar -->
+  <header class="glass rounded-[22px] px-4 py-3 flex items-center justify-between">
     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400/25 to-violet-500/25 border border-cyan-400/25 flex items-center justify-center">
-        <div class="w-4 h-4 rounded-[4px] bg-cyan-300 shadow-[0_0_14px_rgba(34,211,238,.8)]"></div>
+      <div class="relative w-11 h-11 rounded-2xl bg-gradient-to-br from-cyan-400/25 via-indigo-500/20 to-fuchsia-500/25 border border-white/10 flex items-center justify-center">
+        <div class="w-4 h-4 rounded-[5px] bg-cyan-300 shadow-[0_0_18px_rgba(34,211,238,.9)]"></div>
       </div>
       <div>
-        <h1 class="display-font text-lg sm:text-xl font-bold text-white leading-none">NEO TETRIS</h1>
-        <p class="text-[10px] sm:text-xs text-slate-400 tracking-wide uppercase mt-1">Modern arcade edition</p>
+        <h1 class="text-lg sm:text-2xl font-extrabold tracking-tight glow-text">NEON<span class="text-cyan-300">TETRIS</span></h1>
+        <p class="text-[10px] uppercase tracking-[.22em] text-slate-400">Modern arcade</p>
       </div>
     </div>
 
-    <div class="text-right">
-      <p class="text-[10px] uppercase tracking-widest text-slate-400">Sasaran skor</p>
-      <p id="target-score" class="stat-value text-lg sm:text-xl text-cyan-300">2,000</p>
+    <div class="chip rounded-2xl px-4 py-2 text-right">
+      <p class="text-[9px] uppercase tracking-[.18em] text-slate-400">Sasaran</p>
+      <p id="target-score" class="mono text-base sm:text-lg text-cyan-300">2,000</p>
     </div>
   </header>
 
-  <!-- Game shell -->
-  <div class="game-shell flex flex-col lg:grid gap-4">
+  <!-- Game area -->
+  <div class="desktop-grid flex flex-col gap-3">
 
-    <!-- Left panel -->
-    <aside class="glass rounded-2xl p-4 flex flex-col gap-4 order-2 lg:order-1">
-      <div>
-        <p class="text-[10px] uppercase tracking-widest text-slate-400 mb-1">Skor</p>
-        <p id="score-text" class="stat-value text-3xl text-white">0</p>
+    <!-- Left stats -->
+    <aside class="glass rounded-[24px] p-4 flex flex-col gap-3 order-2 lg:order-1">
+      <div class="flex items-center justify-between">
+        <p class="text-[10px] uppercase tracking-[.2em] text-slate-400">Skor</p>
+        <p id="score-text" class="mono text-2xl font-extrabold text-white">0</p>
       </div>
 
       <div>
-        <div class="flex items-center justify-between mb-2">
-          <p class="text-[10px] uppercase tracking-widest text-slate-400">Kemajuan</p>
-          <p id="next-level-info" class="text-[10px] text-slate-400">Lagi 2,000 pts</p>
+        <div class="flex justify-between text-[10px] text-slate-400 mb-2">
+          <span class="uppercase tracking-[.18em]">Kemajuan</span>
+          <span id="next-level-info" class="text-slate-300">Lagi 2,000 pts</span>
         </div>
-        <div class="progress-track w-full h-2 rounded-full overflow-hidden">
-          <div id="progress-bar" class="progress-fill h-full rounded-full w-0"></div>
+        <div class="progress h-2.5 rounded-full overflow-hidden">
+          <div id="progress-bar" class="progress-fill h-full w-0 rounded-full"></div>
         </div>
       </div>
 
-      <div class="grid grid-cols-2 gap-3">
-        <div class="rounded-xl border border-white/5 bg-slate-900/50 p-3">
-          <p class="text-[10px] uppercase tracking-widest text-slate-400">Tahap</p>
-          <p id="level" class="stat-value text-xl text-violet-300 mt-1">1/99</p>
+      <div class="grid grid-cols-2 gap-2">
+        <div class="chip rounded-2xl p-3">
+          <p class="text-[9px] uppercase tracking-[.18em] text-slate-400">Tahap</p>
+          <p id="level" class="mono text-lg font-extrabold text-violet-300 mt-1">1/99</p>
         </div>
-        <button onclick="window.toggleGamePause()"
-          class="rounded-xl border border-white/10 bg-slate-900/50 p-3 flex flex-col items-start hover:border-cyan-400/40 transition-colors">
-          <p class="text-[10px] uppercase tracking-widest text-slate-400">Kawalan</p>
-          <p id="pause-label" class="stat-value text-sm text-cyan-300 mt-1">JEDA</p>
+
+        <button onclick="window.toggleGamePause()" class="chip rounded-2xl p-3 text-left active:scale-95 transition-transform">
+          <p class="text-[9px] uppercase tracking-[.18em] text-slate-400">Kawalan</p>
+          <p id="pause-label" class="mono text-sm font-extrabold text-cyan-300 mt-1">JEDA</p>
         </button>
       </div>
 
-      <div class="rounded-xl border border-white/5 bg-slate-900/40 p-3">
-        <p class="text-[10px] uppercase tracking-widest text-slate-400 mb-2">Kawalan papan kekunci</p>
-        <div class="text-xs text-slate-300 space-y-1">
-          <p><span class="text-cyan-300 font-semibold">← →</span> Gerak</p>
-          <p><span class="text-cyan-300 font-semibold">↑</span> Pusing</p>
-          <p><span class="text-cyan-300 font-semibold">↓</span> Turun</p>
-          <p><span class="text-cyan-300 font-semibold">Space</span> Jatuh terus</p>
+      <div class="chip rounded-2xl p-3">
+        <p class="text-[9px] uppercase tracking-[.18em] text-slate-400 mb-2">Kekunci</p>
+        <div class="text-[11px] text-slate-300 space-y-1">
+          <p><span class="mono text-cyan-300">← →</span> Gerak</p>
+          <p><span class="mono text-cyan-300">↑</span> Pusing</p>
+          <p><span class="mono text-cyan-300">↓</span> Turun</p>
+          <p><span class="mono text-cyan-300">Space</span> Jatuh terus</p>
         </div>
       </div>
     </aside>
 
     <!-- Board -->
-    <main class="order-1 lg:order-2 flex flex-col items-center">
-      <div class="board-frame relative rounded-3xl p-2 sm:p-3">
+    <main class="order-1 lg:order-2 flex justify-center">
+      <div class="board-wrap relative rounded-[28px] p-2 sm:p-3">
         <canvas id="tetris" width="180" height="360"
-          class="block w-[min(88vw,340px)] h-[min(176vw,680px)] sm:w-[360px] sm:h-[720px] bg-[#05070d] rounded-2xl"></canvas>
+          class="block bg-[#04060b] w-[min(90vw,350px)] h-[min(180vw,700px)] sm:w-[360px] sm:h-[720px]"></canvas>
 
         <div id="game-overlay"
-          class="absolute inset-2 sm:inset-3 rounded-2xl bg-slate-950/85 backdrop-blur-xl flex flex-col items-center justify-center p-6 text-center z-10">
-          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-400/30 to-violet-500/30 border border-cyan-300/30 flex items-center justify-center mb-4">
-            <svg class="w-6 h-6 text-cyan-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
-            </svg>
+          class="absolute inset-2 sm:inset-3 rounded-[22px] bg-[#04060b]/80 backdrop-blur-xl flex flex-col items-center justify-center p-6 text-center z-10">
+          
+          <div class="w-16 h-16 rounded-3xl bg-gradient-to-br from-cyan-400/30 via-indigo-500/25 to-fuchsia-500/30 border border-white/15 flex items-center justify-center mb-5 shadow-[0_0_45px_rgba(34,211,238,.25)]">
+            <div class="w-5 h-5 rounded-md bg-cyan-300 shadow-[0_0_22px_rgba(34,211,238,.9)]"></div>
           </div>
 
-          <h2 id="overlay-title" class="display-font text-2xl sm:text-3xl font-bold text-white mb-2">NEO TETRIS</h2>
-          <p id="overlay-desc" class="text-sm text-slate-300 max-w-xs mb-6">
-            Susun blok, kosongkan baris dan capai sasaran skor 2,000 mata.
+          <h2 id="overlay-title" class="text-3xl sm:text-4xl font-extrabold tracking-tight glow-text mb-3">NEON TETRIS</h2>
+          <p id="overlay-desc" class="text-sm text-slate-300 max-w-xs mb-7">
+            Susun blok neon, kosongkan baris dan capai 2,000 mata.
           </p>
 
           <button id="start-btn" onclick="window.startTetrisGame()"
-            class="primary-btn display-font text-slate-950 font-bold px-7 py-3 rounded-xl text-sm">
+            class="start-btn text-slate-950 font-extrabold px-8 py-3.5 rounded-2xl text-sm tracking-wide">
             MULA MAIN
           </button>
         </div>
       </div>
     </main>
 
-    <!-- Right panel -->
-    <aside class="glass rounded-2xl p-4 flex flex-col gap-4 order-3">
-      <div>
-        <p class="text-[10px] uppercase tracking-widest text-slate-400 mb-3">Blok seterusnya</p>
-        <div class="flex items-center gap-3">
-          <div class="rounded-xl bg-slate-950/70 border border-white/10 p-2">
-            <canvas id="nextCanvas1" width="30" height="25" class="w-[90px] h-[75px]"></canvas>
+    <!-- Next pieces -->
+    <aside class="glass rounded-[24px] p-4 flex flex-col gap-3 order-3">
+      <p class="text-[10px] uppercase tracking-[.2em] text-slate-400">Seterusnya</p>
+
+      <div class="flex items-center gap-3">
+        <div class="chip rounded-2xl p-2.5">
+          <canvas id="nextCanvas1" width="30" height="25" class="w-[92px] h-[76px]"></canvas>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <div class="chip rounded-xl p-2 opacity-85">
+            <canvas id="nextCanvas2" width="25" height="20" class="w-[64px] h-[52px]"></canvas>
           </div>
-          <div class="flex flex-col gap-2">
-            <div class="rounded-lg bg-slate-950/60 border border-white/5 p-1.5">
-              <canvas id="nextCanvas2" width="25" height="20" class="w-[62px] h-[50px] opacity-80"></canvas>
-            </div>
-            <div class="rounded-lg bg-slate-950/50 border border-white/5 p-1.5">
-              <canvas id="nextCanvas3" width="20" height="15" class="w-[50px] h-[38px] opacity-60"></canvas>
-            </div>
+          <div class="chip rounded-xl p-2 opacity-65">
+            <canvas id="nextCanvas3" width="20" height="15" class="w-[52px] h-[40px]"></canvas>
           </div>
         </div>
       </div>
 
-      <div class="rounded-xl border border-white/5 bg-slate-900/40 p-3">
-        <p class="text-[10px] uppercase tracking-widest text-slate-400 mb-2">Petua</p>
-        <p class="text-xs text-slate-300 leading-relaxed">
-          Blok putih lut sinar menunjukkan lokasi blok akan mendarat. Gunakan <span class="text-cyan-300 font-semibold">Hard Drop</span> untuk menjimatkan masa.
+      <div class="chip rounded-2xl p-3">
+        <p class="text-[9px] uppercase tracking-[.18em] text-slate-400 mb-2">Petua</p>
+        <p class="text-[11px] text-slate-300 leading-relaxed">
+          Blok putih lut sinar ialah tempat blok akan mendarat. Tekan butang anak panah berganda untuk jatuh terus.
         </p>
       </div>
     </aside>
   </div>
 
-  <!-- Mobile controls -->
-  <nav class="lg:hidden w-full max-w-md mx-auto">
-    <div class="glass rounded-2xl p-2 grid grid-cols-5 gap-2">
-      <button onclick="window.actionMove(-1)" class="control-btn rounded-xl py-4 flex items-center justify-center">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+  <!-- Controls -->
+  <nav class="w-full max-w-md mx-auto">
+    <div class="glass rounded-[26px] p-2 grid grid-cols-5 gap-2">
+      <button onclick="window.actionMove(-1)" class="btn rounded-2xl py-5 flex items-center justify-center">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
       </button>
 
-      <button onclick="window.actionRotate()" class="control-btn rounded-xl py-4 flex items-center justify-center">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+      <button onclick="window.actionRotate()" class="btn rounded-2xl py-5 flex items-center justify-center text-cyan-300">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
       </button>
 
-      <button onclick="window.actionSoftDrop()" class="control-btn rounded-xl py-4 flex items-center justify-center">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+      <button onclick="window.actionSoftDrop()" class="btn rounded-2xl py-5 flex items-center justify-center">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
       </button>
 
-      <button onclick="window.actionHardDrop()" class="control-btn rounded-xl py-4 flex items-center justify-center text-amber-300">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 13l-7 7-7-7m14-8l-7 7-7-7"/></svg>
+      <button onclick="window.actionHardDrop()" class="btn rounded-2xl py-5 flex items-center justify-center text-amber-300">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 13l-7 7-7-7m14-8l-7 7-7-7"/></svg>
       </button>
 
-      <button onclick="window.actionMove(1)" class="control-btn rounded-xl py-4 flex items-center justify-center">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+      <button onclick="window.actionMove(1)" class="btn rounded-2xl py-5 flex items-center justify-center">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
       </button>
     </div>
   </nav>
@@ -250,19 +286,13 @@
 
 <script>
 (function() {
-    let canvas, ctx;
-    let nextCtx1, nextCtx2, nextCtx3;
-    let arena = [];
-    let queue = [];
+    let canvas, ctx, nextCtx1, nextCtx2, nextCtx3;
+    let arena = [], queue = [];
     let player = { pos: { x: 0, y: 0 }, matrix: null, score: 0, lines: 0, level: 1 };
-    let isPlaying = false;
-    let isPaused = false;
-    let dropCounter = 0;
-    let dropInterval = 1000;
-    let lastTime = 0;
-    let animId = null;
-
+    let isPlaying = false, isPaused = false;
+    let dropCounter = 0, dropInterval = 1000, lastTime = 0, animId = null;
     let audioCtx = null;
+
     function initAudio() {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
@@ -281,20 +311,20 @@
 
             if (type === 'move') {
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(320, now);
+                osc.frequency.setValueAtTime(340, now);
                 gain.gain.setValueAtTime(.04, now);
                 gain.gain.exponentialRampToValueAtTime(.001, now + .05);
                 osc.start(now); osc.stop(now + .05);
             } else if (type === 'rotate') {
                 osc.type = 'triangle';
-                osc.frequency.setValueAtTime(420, now);
-                osc.frequency.exponentialRampToValueAtTime(680, now + .07);
+                osc.frequency.setValueAtTime(430, now);
+                osc.frequency.exponentialRampToValueAtTime(700, now + .07);
                 gain.gain.setValueAtTime(.06, now);
                 gain.gain.exponentialRampToValueAtTime(.001, now + .08);
                 osc.start(now); osc.stop(now + .08);
             } else if (type === 'drop') {
                 osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(240, now);
+                osc.frequency.setValueAtTime(250, now);
                 osc.frequency.exponentialRampToValueAtTime(90, now + .12);
                 gain.gain.setValueAtTime(.08, now);
                 gain.gain.exponentialRampToValueAtTime(.001, now + .12);
@@ -303,7 +333,7 @@
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(520, now);
                 osc.frequency.setValueAtTime(760, now + .07);
-                osc.frequency.setValueAtTime(980, now + .14);
+                osc.frequency.setValueAtTime(1000, now + .14);
                 gain.gain.setValueAtTime(.12, now);
                 gain.gain.exponentialRampToValueAtTime(.001, now + .28);
                 osc.start(now); osc.stop(now + .28);
@@ -311,16 +341,7 @@
         } catch(e) {}
     }
 
-    const colors = [
-        null,
-        '#f472b6', // T
-        '#22d3ee', // I
-        '#34d399', // S
-        '#a78bfa', // Z
-        '#fb923c', // L
-        '#facc15', // J
-        '#60a5fa'  // O
-    ];
+    const colors = [null, '#f472b6', '#22d3ee', '#34d399', '#a78bfa', '#fb923c', '#facc15', '#60a5fa'];
 
     function makeMatrix(w, h) {
         const m = [];
@@ -340,8 +361,7 @@
     }
 
     function randType() {
-        const chars = 'TJLOSZI';
-        return chars[(Math.random() * chars.length) | 0];
+        return 'TJLOSZI'[(Math.random() * 7) | 0];
     }
 
     function refillQueue() {
@@ -359,14 +379,13 @@
     }
 
     function checkCollide(ar, pl) {
-        const [m, o] = [pl.matrix, pl.pos];
-        for (let y = 0; y < m.length; ++y) {
-            for (let x = 0; x < m[y].length; ++x) {
+        const m = pl.matrix, o = pl.pos;
+        for (let y = 0; y < m.length; y++) {
+            for (let x = 0; x < m[y].length; x++) {
                 if (m[y][x] !== 0) {
-                    const newX = x + o.x;
-                    const newY = y + o.y;
-                    if (newX < 0 || newX >= ar[0].length || newY >= ar.length) return true;
-                    if (newY >= 0 && ar[newY][newX] !== 0) return true;
+                    const nx = x + o.x, ny = y + o.y;
+                    if (nx < 0 || nx >= ar[0].length || ny >= ar.length) return true;
+                    if (ny >= 0 && ar[ny][nx] !== 0) return true;
                 }
             }
         }
@@ -384,8 +403,8 @@
     }
 
     function rotateMatrix(m, dir) {
-        for (let y = 0; y < m.length; ++y) {
-            for (let x = 0; x < y; ++x) {
+        for (let y = 0; y < m.length; y++) {
+            for (let x = 0; x < y; x++) {
                 [m[x][y], m[y][x]] = [m[y][x], m[x][y]];
             }
         }
@@ -395,10 +414,9 @@
 
     function resetPlayer() {
         refillQueue();
-        const nextT = queue.shift();
-        player.matrix = getPiece(nextT);
+        player.matrix = getPiece(queue.shift());
         player.pos.y = 0;
-        player.pos.x = (arena[0].length / 2 | 0) - (player.matrix[0].length / 2 | 0);
+        player.pos.x = ((arena[0].length / 2) | 0) - ((player.matrix[0].length / 2) | 0);
 
         if (checkCollide(arena, player)) triggerGameOver();
         drawQueuePreviews();
@@ -406,13 +424,13 @@
 
     function clearLines() {
         let count = 0;
-        outer: for (let y = arena.length - 1; y > 0; --y) {
-            for (let x = 0; x < arena[y].length; ++x) {
+        outer: for (let y = arena.length - 1; y > 0; y--) {
+            for (let x = 0; x < arena[y].length; x++) {
                 if (arena[y][x] === 0) continue outer;
             }
-            const removed = arena.splice(y, 1)[0].fill(0);
-            arena.unshift(removed);
-            ++y;
+            arena.splice(y, 1)[0].fill(0);
+            arena.unshift(new Array(arena[0].length).fill(0));
+            y++;
             count++;
         }
 
@@ -429,29 +447,29 @@
 
     function drawBlock(matrix, offset, targetCtx) {
         if (!matrix || !targetCtx) return;
+
         matrix.forEach((row, y) => {
             row.forEach((val, x) => {
-                if (val !== 0) {
-                    const px = x + offset.x;
-                    const py = y + offset.y;
-                    const c = colors[val] || '#22d3ee';
+                if (!val) return;
+                const px = x + offset.x;
+                const py = y + offset.y;
+                const c = colors[val] || '#22d3ee';
 
-                    targetCtx.fillStyle = c;
-                    targetCtx.fillRect(px + .06, py + .06, .88, .88);
+                targetCtx.fillStyle = c;
+                targetCtx.fillRect(px + .07, py + .07, .86, .86);
 
-                    targetCtx.fillStyle = 'rgba(255,255,255,.22)';
-                    targetCtx.fillRect(px + .12, py + .12, .76, .16);
+                targetCtx.fillStyle = 'rgba(255,255,255,.30)';
+                targetCtx.fillRect(px + .16, py + .16, .68, .14);
 
-                    targetCtx.strokeStyle = 'rgba(0,0,0,.35)';
-                    targetCtx.lineWidth = .04;
-                    targetCtx.strokeRect(px + .06, py + .06, .88, .88);
-                }
+                targetCtx.strokeStyle = 'rgba(0,0,0,.35)';
+                targetCtx.lineWidth = .04;
+                targetCtx.strokeRect(px + .07, py + .07, .86, .86);
             });
         });
     }
 
     function drawGhost() {
-        if (!player.matrix || !ctx) return;
+        if (!player.matrix) return;
         const ghost = { pos: { x: player.pos.x, y: player.pos.y }, matrix: player.matrix };
 
         while (!checkCollide(arena, ghost)) ghost.pos.y++;
@@ -459,13 +477,12 @@
 
         player.matrix.forEach((row, y) => {
             row.forEach((val, x) => {
-                if (val !== 0) {
-                    ctx.fillStyle = 'rgba(226,232,240,.10)';
-                    ctx.fillRect(x + ghost.pos.x + .08, y + ghost.pos.y + .08, .84, .84);
-                    ctx.strokeStyle = 'rgba(226,232,240,.25)';
-                    ctx.lineWidth = .03;
-                    ctx.strokeRect(x + ghost.pos.x + .08, y + ghost.pos.y + .08, .84, .84);
-                }
+                if (!val) return;
+                ctx.fillStyle = 'rgba(226,232,240,.10)';
+                ctx.fillRect(x + ghost.pos.x + .08, y + ghost.pos.y + .08, .84, .84);
+                ctx.strokeStyle = 'rgba(226,232,240,.28)';
+                ctx.lineWidth = .03;
+                ctx.strokeRect(x + ghost.pos.x + .08, y + ghost.pos.y + .08, .84, .84);
             });
         });
     }
@@ -487,24 +504,18 @@
     }
 
     function renderScene() {
-        if (!ctx || !canvas) return;
-        ctx.fillStyle = '#05070d';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        if (!ctx) return;
+        ctx.fillStyle = '#04060b';
+        ctx.fillRect(0, 0, 15, 30);
 
         ctx.strokeStyle = 'rgba(148,163,184,.07)';
         ctx.lineWidth = .03;
 
         for (let i = 0; i <= 15; i++) {
-            ctx.beginPath();
-            ctx.moveTo(i, 0);
-            ctx.lineTo(i, 30);
-            ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 30); ctx.stroke();
         }
         for (let j = 0; j <= 30; j++) {
-            ctx.beginPath();
-            ctx.moveTo(0, j);
-            ctx.lineTo(15, j);
-            ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(15, j); ctx.stroke();
         }
 
         drawBlock(arena, { x: 0, y: 0 }, ctx);
@@ -517,6 +528,7 @@
 
     function gameLoop(time = 0) {
         if (!isPlaying || isPaused) return;
+
         const delta = time - lastTime;
         lastTime = time;
         dropCounter += delta;
@@ -529,6 +541,7 @@
 
     function playerDropStep() {
         player.pos.y++;
+
         if (checkCollide(arena, player)) {
             player.pos.y--;
             mergePiece();
@@ -536,34 +549,34 @@
             clearLines();
             updateScoreDisplay();
         }
+
         dropCounter = 0;
     }
 
     function updateScoreDisplay() {
-        const sEl = document.getElementById('score-text');
-        const lEl = document.getElementById('level');
-        const bEl = document.getElementById('progress-bar');
-        const nxtInfo = document.getElementById('next-level-info');
+        const scoreEl = document.getElementById('score-text');
+        const levelEl = document.getElementById('level');
+        const barEl = document.getElementById('progress-bar');
+        const infoEl = document.getElementById('next-level-info');
 
-        if (sEl) sEl.innerText = player.score.toLocaleString('ms-MY');
-        if (lEl) lEl.innerText = `${player.level}/99`;
+        scoreEl.innerText = player.score.toLocaleString('ms-MY');
+        levelEl.innerText = `${player.level}/99`;
 
         const remaining = Math.max(0, 2000 - player.score);
-        if (nxtInfo) {
-            if (player.score >= 2000) {
-                nxtInfo.innerText = 'Sasaran dicapai!';
-                nxtInfo.classList.add('text-emerald-400');
-            } else {
-                nxtInfo.innerText = `Lagi ${remaining.toLocaleString('ms-MY')} pts`;
-            }
+
+        if (player.score >= 2000) {
+            infoEl.innerText = 'Sasaran dicapai!';
+            infoEl.classList.add('text-emerald-400');
+        } else {
+            infoEl.innerText = `Lagi ${remaining.toLocaleString('ms-MY')} pts`;
         }
 
-        if (bEl) bEl.style.width = Math.min(100, (player.score / 2000) * 100) + '%';
+        barEl.style.width = Math.min(100, (player.score / 2000) * 100) + '%';
     }
 
     function triggerGameOver() {
         isPlaying = false;
-        if (animId) cancelAnimationFrame(animId);
+        cancelAnimationFrame(animId);
 
         document.getElementById('overlay-title').innerText = 'TAMAT PERMAINAN';
         document.getElementById('overlay-desc').innerHTML =
@@ -583,7 +596,7 @@
         updateScoreDisplay();
 
         lastTime = performance.now();
-        if (animId) cancelAnimationFrame(animId);
+        cancelAnimationFrame(animId);
         gameLoop();
     };
 
@@ -615,19 +628,23 @@
 
     window.actionRotate = function() {
         if (!isPlaying || isPaused) return;
-        const px = player.pos.x;
+
+        const startX = player.pos.x;
         let offset = 1;
 
         rotateMatrix(player.matrix, 1);
+
         while (checkCollide(arena, player)) {
             player.pos.x += offset;
             offset = -(offset + (offset > 0 ? 1 : -1));
+
             if (offset > player.matrix[0].length) {
                 rotateMatrix(player.matrix, -1);
-                player.pos.x = px;
+                player.pos.x = startX;
                 return;
             }
         }
+
         playSound('rotate');
     };
 
@@ -639,8 +656,10 @@
 
     window.actionHardDrop = function() {
         if (!isPlaying || isPaused) return;
+
         while (!checkCollide(arena, player)) player.pos.y++;
         player.pos.y--;
+
         mergePiece();
         resetPlayer();
         clearLines();
@@ -651,6 +670,7 @@
 
     window.addEventListener('keydown', e => {
         if (!isPlaying || isPaused) return;
+
         if (e.key === 'ArrowLeft') window.actionMove(-1);
         else if (e.key === 'ArrowRight') window.actionMove(1);
         else if (e.key === 'ArrowDown') window.actionSoftDrop();
@@ -663,20 +683,16 @@
 
     window.addEventListener('DOMContentLoaded', () => {
         canvas = document.getElementById('tetris');
-        if (canvas) ctx = canvas.getContext('2d');
-        if (ctx) ctx.scale(12, 12);
+        ctx = canvas.getContext('2d');
+        ctx.scale(12, 12);
 
-        const c1 = document.getElementById('nextCanvas1');
-        const c2 = document.getElementById('nextCanvas2');
-        const c3 = document.getElementById('nextCanvas3');
+        nextCtx1 = document.getElementById('nextCanvas1').getContext('2d');
+        nextCtx2 = document.getElementById('nextCanvas2').getContext('2d');
+        nextCtx3 = document.getElementById('nextCanvas3').getContext('2d');
 
-        if (c1) nextCtx1 = c1.getContext('2d');
-        if (c2) nextCtx2 = c2.getContext('2d');
-        if (c3) nextCtx3 = c3.getContext('2d');
-
-        if (nextCtx1) nextCtx1.scale(10, 10);
-        if (nextCtx2) nextCtx2.scale(8, 8);
-        if (nextCtx3) nextCtx3.scale(6, 6);
+        nextCtx1.scale(10, 10);
+        nextCtx2.scale(8, 8);
+        nextCtx3.scale(6, 6);
 
         arena = makeMatrix(15, 30);
         refillQueue();
