@@ -164,7 +164,7 @@
                 <span class="text-xs font-extrabold tracking-wide mt-1">KIRI</span>
             </button>
 
-            <!-- Jatuh Terus (DROPP - kini di tempat kedua) -->
+            <!-- Jatuh Terus (DROPP) -->
             <button onclick="window.actionHardDrop()" aria-label="Jatuh Terus" class="btn-3d bg-gradient-to-b from-amber-400 to-orange-600 text-slate-950 py-3.5 sm:py-4 rounded-xl border border-amber-200/50 flex flex-col items-center justify-center cursor-pointer">
                 <svg class="w-7 h-7 sm:w-8 sm:h-8" fill="none" stroke="currentColor" stroke-width="3.4" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 13l-7 7-7-7m14-8l-7 7-7-7"/>
@@ -180,7 +180,7 @@
                 <span class="text-xs font-extrabold tracking-wide mt-1">TURUN</span>
             </button>
 
-            <!-- Pusing (kini di tempat keempat) -->
+            <!-- Pusing -->
             <button onclick="window.actionRotate()" aria-label="Pusing Blok" class="btn-3d bg-gradient-to-b from-purple-500 to-indigo-700 text-white py-3.5 sm:py-4 rounded-xl border border-purple-300/40 flex flex-col items-center justify-center cursor-pointer">
                 <svg class="w-7 h-7 sm:w-8 sm:h-8" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
@@ -277,40 +277,54 @@
             }
 
             const pieceStyles = {
-                1: { top: '#fb923c', fill: '#ea580c', bottom: '#9a3412', bevel: '#fed7aa', shadow: '#7c2d12' },
-                2: { top: '#fde047', fill: '#eab308', bottom: '#a16207', bevel: '#fef9c3', shadow: '#854d0e' },
-                3: { top: '#f87171', fill: '#dc2626', bottom: '#991b1b', bevel: '#fecaca', shadow: '#7f1d1d' },
-                4: { top: '#4ade80', fill: '#16a34a', bottom: '#166534', bevel: '#bbf7d0', shadow: '#14532d' },
-                5: { top: '#c084fc', fill: '#9333ea', bottom: '#6b21a8', bevel: '#e9d5ff', shadow: '#581c87' },
-                6: { top: '#60a5fa', fill: '#2563eb', bottom: '#1e40af', bevel: '#bfdbfe', shadow: '#1e3a8a' },
-                7: { top: '#38bdf8', fill: '#0284c7', bottom: '#075985', bevel: '#bae6fd', shadow: '#0c4a6e' }
+                1: { top: '#fb923c', fill: '#ea580c', bottom: '#9a3412', bevel: '#fed7aa', shadow: '#7c2d12' }, // Jingga
+                2: { top: '#fde047', fill: '#eab308', bottom: '#a16207', bevel: '#fef9c3', shadow: '#854d0e' }, // Kuning
+                3: { top: '#f87171', fill: '#dc2626', bottom: '#991b1b', bevel: '#fecaca', shadow: '#7f1d1d' }, // Merah
+                4: { top: '#4ade80', fill: '#16a34a', bottom: '#166534', bevel: '#bbf7d0', shadow: '#14532d' }, // Hijau
+                5: { top: '#c084fc', fill: '#9333ea', bottom: '#6b21a8', bevel: '#e9d5ff', shadow: '#581c87' }, // Ungu
+                6: { top: '#60a5fa', fill: '#2563eb', bottom: '#1e40af', bevel: '#bfdbfe', shadow: '#1e3a8a' }, // Biru
+                7: { top: '#38bdf8', fill: '#0284c7', bottom: '#075985', bevel: '#bae6fd', shadow: '#0c4a6e' }  // Biru Muda
             };
+
+            const NUM_COLORS = 7;
+            let lastColorId = 0;
+
+            function randColorId() {
+                let id = ((Math.random() * NUM_COLORS) | 0) + 1;
+                if (NUM_COLORS > 1 && id === lastColorId) {
+                    id = (id % NUM_COLORS) + 1;
+                }
+                lastColorId = id;
+                return id;
+            }
 
             function makeMatrix(w, h) {
                 return Array.from({ length: h }, () => new Array(w).fill(0));
             }
 
-            function getPiece(type) {
+            function getPiece(type, colorId) {
+                const c = colorId || randColorId();
                 switch (type) {
-                    case 'T': return [[0, 5, 0], [5, 5, 5], [0, 0, 0]];
-                    case 'I': return [[0, 7, 0, 0], [0, 7, 0, 0], [0, 7, 0, 0], [0, 7, 0, 0]];
-                    case 'S': return [[0, 4, 4], [4, 4, 0], [0, 0, 0]];
-                    case 'Z': return [[3, 3, 0], [0, 3, 3], [0, 0, 0]];
-                    case 'L': return [[0, 0, 1], [1, 1, 1], [0, 0, 0]];
-                    case 'J': return [[6, 0, 0], [6, 6, 6], [0, 0, 0]];
-                    case 'O': return [[2, 2], [2, 2]];
-                    default: return [[5]];
+                    case 'T': return [[0, c, 0], [c, c, c], [0, 0, 0]];
+                    case 'I': return [[0, c, 0, 0], [0, c, 0, 0], [0, c, 0, 0], [0, c, 0, 0]];
+                    case 'S': return [[0, c, c], [c, c, 0], [0, 0, 0]];
+                    case 'Z': return [[c, c, 0], [0, c, c], [0, 0, 0]];
+                    case 'L': return [[0, 0, c], [c, c, c], [0, 0, 0]];
+                    case 'J': return [[c, 0, 0], [c, c, c], [0, 0, 0]];
+                    case 'O': return [[c, c], [c, c]];
+                    default: return [[c]];
                 }
             }
 
-            function randType() {
+            function randItem() {
                 const chars = 'TJLOSZI';
-                return chars[(Math.random() * chars.length) | 0];
+                const type = chars[(Math.random() * chars.length) | 0];
+                return { type, colorId: randColorId() };
             }
 
             function refillQueue() {
                 while (queue.length < 5) {
-                    queue.push(randType());
+                    queue.push(randItem());
                 }
             }
 
@@ -378,8 +392,8 @@
 
             function resetPlayer() {
                 refillQueue();
-                const nextT = queue.shift();
-                player.matrix = getPiece(nextT);
+                const nextItem = queue.shift();
+                player.matrix = getPiece(nextItem.type, nextItem.colorId);
                 player.pos.y = 0;
                 player.pos.x = ((COLS / 2) | 0) - ((player.matrix[0].length / 2) | 0);
 
@@ -544,13 +558,13 @@
                 });
             }
 
-            function drawPreviewOnCanvas(targetCtx, pieceType, maxCellSize) {
-                if (!targetCtx) return;
+            function drawPreviewOnCanvas(targetCtx, item, maxCellSize) {
+                if (!targetCtx || !item) return;
                 const w = targetCtx.canvas.width;
                 const h = targetCtx.canvas.height;
                 targetCtx.clearRect(0, 0, w, h);
 
-                const m = getPiece(pieceType);
+                const m = getPiece(item.type, item.colorId);
                 let minX = m[0].length, maxX = -1, minY = m.length, maxY = -1;
                 m.forEach((row, y) => {
                     row.forEach((val, x) => {
@@ -872,7 +886,8 @@
 
                 arena = makeMatrix(COLS, ROWS);
                 refillQueue();
-                player.matrix = getPiece(queue[0]);
+                const firstItem = queue[0];
+                player.matrix = getPiece(firstItem.type, firstItem.colorId);
                 player.pos.x = ((COLS / 2) | 0) - ((player.matrix[0].length / 2) | 0);
                 drawQueuePreviews();
                 updateScoreDisplay();
