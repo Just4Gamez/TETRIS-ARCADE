@@ -276,14 +276,15 @@
                 } catch (e) {}
             }
 
+            // Warna dan tona timbul ala blok dalam video
             const pieceStyles = {
-                1: { fill: '#f97316', light: '#fdba74', dark: '#c2410c' },
-                2: { fill: '#facc15', light: '#fef08a', dark: '#ca8a04' },
-                3: { fill: '#f43f5e', light: '#fda4af', dark: '#be123c' },
-                4: { fill: '#22c55e', light: '#86efac', dark: '#15803d' },
-                5: { fill: '#a855f7', light: '#d8b4fe', dark: '#7e22ce' },
-                6: { fill: '#3b82f6', light: '#93c5fd', dark: '#1d4ed8' },
-                7: { fill: '#06b6d4', light: '#67e8f9', dark: '#0e7490' }
+                1: { top: '#fb923c', fill: '#ea580c', bottom: '#9a3412', bevel: '#fed7aa', shadow: '#7c2d12' }, // Jingga
+                2: { top: '#fde047', fill: '#eab308', bottom: '#a16207', bevel: '#fef9c3', shadow: '#854d0e' }, // Kuning
+                3: { top: '#f87171', fill: '#dc2626', bottom: '#991b1b', bevel: '#fecaca', shadow: '#7f1d1d' }, // Merah
+                4: { top: '#4ade80', fill: '#16a34a', bottom: '#166534', bevel: '#bbf7d0', shadow: '#14532d' }, // Hijau
+                5: { top: '#c084fc', fill: '#9333ea', bottom: '#6b21a8', bevel: '#e9d5ff', shadow: '#581c87' }, // Ungu
+                6: { top: '#60a5fa', fill: '#2563eb', bottom: '#1e40af', bevel: '#bfdbfe', shadow: '#1e3a8a' }, // Biru
+                7: { top: '#38bdf8', fill: '#0284c7', bottom: '#075985', bevel: '#bae6fd', shadow: '#0c4a6e' }  // Biru Muda / Sian
             };
 
             function makeMatrix(w, h) {
@@ -422,39 +423,90 @@
                 targetCtx.roundRect(x, y, w, h, r);
             }
 
+            // Lukisan kiub timbul (cushion bevel) seperti dalam video
             function drawSingleCube(targetCtx, gx, gy, val, cellSize) {
                 const st = pieceStyles[val] || pieceStyles[5];
                 const px = gx * cellSize;
                 const py = gy * cellSize;
-                const pad = Math.max(0.8, cellSize * 0.06);
+                const pad = Math.max(0.7, cellSize * 0.04);
+                const x = px + pad;
+                const y = py + pad;
                 const s = cellSize - pad * 2;
-                const r = Math.max(2, cellSize * 0.18);
-
-                drawRoundedRect(targetCtx, px + pad, py + pad, s, s, r);
-                targetCtx.fillStyle = st.fill;
-                targetCtx.fill();
+                const r = Math.max(2.5, s * 0.22);
 
                 targetCtx.save();
-                drawRoundedRect(targetCtx, px + pad, py + pad, s, s, r);
+
+                // Tapak & kecerunan utama kiub
+                const grad = targetCtx.createLinearGradient(x, y, x, y + s);
+                grad.addColorStop(0, st.top);
+                grad.addColorStop(0.5, st.fill);
+                grad.addColorStop(1, st.bottom);
+
+                drawRoundedRect(targetCtx, x, y, s, s, r);
+                targetCtx.fillStyle = grad;
+                targetCtx.fill();
+
+                // Klip dalaman untuk efek bevel/cushion timbul
                 targetCtx.clip();
 
-                targetCtx.fillStyle = st.light;
-                targetCtx.fillRect(px + pad, py + pad, s, Math.max(1.5, s * 0.18));
-                targetCtx.fillRect(px + pad, py + pad, Math.max(1.5, s * 0.16), s);
+                const rim = Math.max(2, s * 0.16);
 
-                targetCtx.fillStyle = st.dark;
-                targetCtx.fillRect(px + pad, py + pad + s - Math.max(1.5, s * 0.2), s, Math.max(1.5, s * 0.2));
-                targetCtx.fillRect(px + pad + s - Math.max(1.5, s * 0.18), py + pad, Math.max(1.5, s * 0.18), s);
+                // Jalur sorotan atas
+                targetCtx.fillStyle = st.bevel;
+                targetCtx.globalAlpha = 0.65;
+                targetCtx.fillRect(x, y, s, rim);
 
-                targetCtx.fillStyle = 'rgba(255,255,255,0.45)';
-                targetCtx.beginPath();
-                targetCtx.arc(px + pad + s * 0.24, py + pad + s * 0.24, Math.max(1, s * 0.08), 0, Math.PI * 2);
+                // Jalur sorotan kiri
+                targetCtx.fillStyle = st.top;
+                targetCtx.globalAlpha = 0.7;
+                targetCtx.fillRect(x, y, rim, s);
+
+                // Jalur bayang bawah
+                targetCtx.fillStyle = st.shadow;
+                targetCtx.globalAlpha = 0.75;
+                targetCtx.fillRect(x, y + s - rim, s, rim);
+
+                // Jalur bayang kanan
+                targetCtx.fillStyle = st.shadow;
+                targetCtx.globalAlpha = 0.55;
+                targetCtx.fillRect(x + s - rim, y, rim, s);
+
+                // Bahagian tengah yang lebih rata supaya nampak seperti kusyen timbul
+                const innerPad = Math.max(2.5, s * 0.15);
+                const innerR = Math.max(1.5, r * 0.7);
+                drawRoundedRect(
+                    targetCtx,
+                    x + innerPad,
+                    y + innerPad,
+                    Math.max(1, s - innerPad * 2),
+                    Math.max(1, s - innerPad * 2),
+                    innerR
+                );
+                targetCtx.fillStyle = st.fill;
+                targetCtx.globalAlpha = 0.88;
                 targetCtx.fill();
+
+                // Kilauan lembut di sudut kiri atas
+                targetCtx.globalAlpha = 0.5;
+                targetCtx.fillStyle = '#ffffff';
+                targetCtx.beginPath();
+                targetCtx.ellipse(
+                    x + s * 0.28,
+                    y + s * 0.24,
+                    Math.max(1.5, s * 0.14),
+                    Math.max(1, s * 0.07),
+                    -0.45,
+                    0,
+                    Math.PI * 2
+                );
+                targetCtx.fill();
+
                 targetCtx.restore();
 
-                drawRoundedRect(targetCtx, px + pad, py + pad, s, s, r);
-                targetCtx.strokeStyle = 'rgba(15, 23, 42, 0.45)';
-                targetCtx.lineWidth = 1;
+                // Garis tepi halus luar kiub
+                drawRoundedRect(targetCtx, x, y, s, s, r);
+                targetCtx.strokeStyle = st.shadow;
+                targetCtx.lineWidth = Math.max(1, cellSize * 0.045);
                 targetCtx.stroke();
             }
 
