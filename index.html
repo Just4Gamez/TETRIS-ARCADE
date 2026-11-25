@@ -3,129 +3,240 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Retro Tetris Game</title>
+    <title>Tetris Arcade — Edisi Moden</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Chakra+Petch:wght@600;700&family=Inter:wght@500;700;800&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background: radial-gradient(circle at center, #1e1b4b 0%, #09090b 100%);
+        * {
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        html, body {
+            height: 100dvh;
+            width: 100vw;
+            overflow: hidden;
+            overscroll-behavior: none;
+            touch-action: none;
+            font-family: 'Chakra Petch', 'Inter', sans-serif;
+            background: radial-gradient(circle at 50% 20%, #172554 0%, #090d1f 60%, #040711 100%);
             color: #f8fafc;
-            touch-action: manipulation;
         }
         .retro-font {
             font-family: 'Press Start 2P', monospace;
         }
-        canvas {
-            image-rendering: pixelated;
+        .board-grid-bg {
+            background-color: #0b1942;
+            background-image:
+                linear-gradient(to right, rgba(37, 99, 235, 0.22) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(37, 99, 235, 0.22) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .panel-bevel {
+            background: linear-gradient(180deg, #1d3575 0%, #11204c 100%);
+            box-shadow:
+                inset 0 2px 0 rgba(147, 197, 253, 0.35),
+                inset 0 -3px 0 rgba(5, 11, 31, 0.8),
+                0 6px 16px rgba(0, 0, 0, 0.45);
+        }
+        .btn-3d {
+            transition: transform 0.06s ease, filter 0.1s ease;
+            box-shadow:
+                inset 0 2px 0 rgba(255, 255, 255, 0.35),
+                0 5px 0 rgba(5, 10, 28, 0.9),
+                0 8px 16px rgba(0, 0, 0, 0.45);
+        }
+        .btn-3d:active {
+            transform: translateY(4px);
+            box-shadow:
+                inset 0 2px 0 rgba(255, 255, 255, 0.2),
+                0 1px 0 rgba(5, 10, 28, 0.9),
+                0 3px 6px rgba(0, 0, 0, 0.4);
+        }
+        @keyframes comboPop {
+            0% { transform: translate(-50%, 6px) scale(0.7); opacity: 0; }
+            20% { transform: translate(-50%, 0px) scale(1.12); opacity: 1; }
+            80% { transform: translate(-50%, -6px) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -14px) scale(0.95); opacity: 0; }
+        }
+        .combo-anim {
+            animation: comboPop 1.15s cubic-bezier(0.22, 1, 0.36, 1) forwards;
         }
     </style>
 </head>
-<body class="min-h-[100dvh] w-full flex flex-col items-center justify-center p-2 selection:bg-cyan-500 selection:text-white select-none bg-slate-950 gap-2">
+<body class="flex flex-col items-center justify-between p-2 sm:p-3">
 
-    <!-- Header Atas -->
-    <header class="w-full max-w-sm flex items-center justify-between px-3 py-1 bg-slate-900/90 backdrop-blur-md rounded-xl border border-purple-500/30 shadow-lg">
-        <div class="w-6 h-6 flex items-center justify-center bg-indigo-950/80 rounded-lg border border-indigo-500/40 text-indigo-300">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
+    <!-- Bar Atas: Sasaran, Kemajuan & Jeda -->
+    <header class="w-full max-w-2xl flex items-center justify-between gap-2 shrink-0 z-20">
+        <div class="panel-bevel flex-1 rounded-xl px-3 py-1.5 border border-blue-400/30 flex items-center justify-between gap-3">
+            <div class="flex flex-col">
+                <span class="text-[9px] sm:text-[10px] tracking-widest text-sky-300 font-bold uppercase">Sasaran Skor</span>
+                <span id="target-score" class="retro-font text-xs sm:text-sm text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]">2,000</span>
+            </div>
+
+            <div class="flex-1 max-w-[220px]">
+                <div class="flex justify-between text-[10px] sm:text-xs font-bold text-sky-100 mb-1">
+                    <span id="score-text">Skor: 0</span>
+                    <span id="progress-pct" class="text-amber-300">0%</span>
+                </div>
+                <div class="w-full bg-slate-950/90 rounded-full h-2.5 overflow-hidden border border-blue-400/30 p-[1px]">
+                    <div id="progress-bar" class="bg-gradient-to-r from-cyan-400 via-pink-500 to-amber-400 h-full rounded-full w-0 transition-all duration-300"></div>
+                </div>
+            </div>
         </div>
-        <div class="flex flex-col items-center">
-            <span class="text-[6px] tracking-wider text-purple-300 font-semibold uppercase">SASARAN SKOR</span>
-            <span id="target-score" class="retro-font text-[9px] text-amber-300 drop-shadow-[0_0_8px_rgba(252,211,77,0.6)]">2,000</span>
-        </div>
-        <div class="w-6 h-6 flex items-center justify-center bg-indigo-950/80 rounded-lg border border-indigo-500/40 text-indigo-300">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path></svg>
-        </div>
+
+        <button onclick="window.toggleGamePause()" aria-label="Jeda Permainan" class="btn-3d panel-bevel rounded-xl px-3 py-2 border border-blue-300/35 flex flex-col items-center justify-center cursor-pointer">
+            <svg id="pause-icon" class="w-5 h-5 text-amber-300" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M6 5h4v14H6zm8 0h4v14h-4z"/>
+            </svg>
+            <span id="pause-label" class="text-[9px] font-bold tracking-wider text-sky-200 mt-0.5 uppercase">Jeda</span>
+        </button>
     </header>
 
-    <!-- Bar Kemajuan -->
-    <div class="w-full max-w-sm px-1">
-        <div class="flex justify-between text-[7px] text-purple-200 mb-0.5 font-medium">
-            <span>Kemajuan</span>
-            <span id="score-text">Skor: 0</span>
-        </div>
-        <div class="w-full bg-slate-900/90 rounded-full h-1.5 overflow-hidden border border-purple-500/30 p-0.5">
-            <div id="progress-bar" class="bg-gradient-to-r from-purple-500 via-pink-500 to-amber-400 h-full rounded-full w-0 transition-all duration-300"></div>
-        </div>
-    </div>
+    <!-- Kawasan Utama (Responsif: Tersusun Cantik di Potret & Lanskap) -->
+    <main class="w-full max-w-2xl flex-1 min-h-0 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 my-1.5">
 
-    <!-- Kanvas Utama Permainan -->
-    <main class="flex flex-col items-center justify-center w-full max-w-sm px-1 gap-1.5">
-        <div class="relative flex items-center justify-center p-1 bg-slate-900/95 border-2 border-purple-500/50 rounded-2xl shadow-[0_0_20px_rgba(168,85,247,0.3)]">
-            <canvas id="tetris" width="180" height="360" class="bg-slate-950 rounded-xl shadow-inner w-[160px] h-[320px] sm:w-[180px] sm:h-[360px]"></canvas>
-
-            <!-- Skrin Mula / Tamat -->
-            <div id="game-overlay" class="absolute inset-0 bg-slate-950/95 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center p-3 text-center z-10">
-                <div class="w-9 h-9 bg-gradient-to-tr from-purple-600 to-pink-500 rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(236,72,153,0.6)] mb-2 animate-bounce">
-                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path></svg>
+        <!-- Panel Kiri (Pada Lanskap) / Baris Atas (Pada Potret): Blok Seterusnya & Info -->
+        <aside class="w-full sm:w-40 shrink-0 grid grid-cols-3 sm:grid-cols-1 gap-2">
+            <!-- Kotak NEXT -->
+            <div class="panel-bevel rounded-xl p-2 border border-blue-400/35 flex flex-col items-center justify-center">
+                <span class="retro-font text-[9px] sm:text-[10px] text-amber-300 tracking-wider mb-1.5">NEXT</span>
+                <div class="flex sm:flex-col items-center justify-center gap-1.5">
+                    <canvas id="nextCanvas1" width="76" height="60" class="bg-slate-950/80 rounded-lg border border-blue-400/30 w-14 h-11 sm:w-20 sm:h-16"></canvas>
+                    <div class="flex sm:flex-row gap-1">
+                        <canvas id="nextCanvas2" width="56" height="44" class="bg-slate-950/60 rounded-md border border-blue-400/20 opacity-85 w-10 h-8 sm:w-11 sm:h-9"></canvas>
+                        <canvas id="nextCanvas3" width="48" height="38" class="bg-slate-950/40 rounded-md border border-blue-400/15 opacity-60 w-8 h-7 sm:w-9 sm:h-8"></canvas>
+                    </div>
                 </div>
-                <h2 id="overlay-title" class="retro-font text-xs md:text-sm text-pink-400 mb-1 drop-shadow-[0_2px_8px_rgba(244,114,182,0.6)]">TETRIS ARCADE</h2>
-                <p id="overlay-desc" class="text-[9px] text-purple-200 mb-2 leading-relaxed max-w-xs">Susun kiub dengan warna berkilat untuk capai sasaran skor!</p>
-                <button id="start-btn" onclick="window.startTetrisGame()" class="retro-font relative group overflow-hidden bg-gradient-to-r from-purple-500 via-pink-500 to-amber-500 text-slate-950 font-extrabold px-4 py-2 rounded-xl shadow-[0_0_15px_rgba(236,72,153,0.5)] active:scale-95 transition-all text-[9px] border border-pink-300/40 cursor-pointer">
+            </div>
+
+            <!-- Kotak TAHAP & BARIS -->
+            <div class="panel-bevel rounded-xl p-2 border border-blue-400/35 flex flex-col items-center justify-center text-center">
+                <span class="text-[10px] font-bold tracking-widest text-sky-300 uppercase">Tahap</span>
+                <span id="level" class="retro-font text-xs sm:text-sm text-amber-300 my-0.5">1/99</span>
+                <span id="next-level-info" class="text-[10px] font-semibold text-cyan-200">Lagi 2,000 pts</span>
+            </div>
+
+            <!-- Kotak GERAKAN (MOVES) -->
+            <div class="panel-bevel rounded-xl p-2 border border-blue-400/35 flex flex-col items-center justify-center text-center">
+                <span class="text-[10px] font-bold tracking-widest text-sky-300 uppercase">Gerakan</span>
+                <span id="moves-count" class="retro-font text-xs sm:text-sm text-emerald-300 my-0.5">0</span>
+                <span id="lines-count" class="text-[10px] font-semibold text-sky-200">0 Baris</span>
+            </div>
+        </aside>
+
+        <!-- Papan Permainan Utama -->
+        <div class="relative h-full max-h-[58dvh] sm:max-h-full aspect-[10/20] flex items-center justify-center p-1.5 rounded-2xl bg-gradient-to-b from-blue-400/50 via-indigo-500/30 to-blue-900/60 shadow-[0_0_28px_rgba(37,99,235,0.45)] border border-sky-300/40">
+            <canvas id="tetris" width="300" height="600" class="w-full h-full rounded-xl board-grid-bg shadow-inner block"></canvas>
+
+            <!-- Pop-up COMBO seperti dalam video -->
+            <div id="combo-badge" class="hidden combo-anim pointer-events-none absolute top-7 left-1/2 z-10 whitespace-nowrap">
+                <div class="px-3 py-1 rounded-full bg-gradient-to-r from-amber-400 via-orange-500 to-pink-500 text-slate-950 font-extrabold text-xs sm:text-sm tracking-wider shadow-[0_0_18px_rgba(251,191,36,0.85)] border border-white/60">
+                    COMBO <span id="combo-num">1</span>x!
+                </div>
+            </div>
+
+            <!-- Skrin Mula / Jeda / Tamat -->
+            <div id="game-overlay" class="absolute inset-0 bg-slate-950/90 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center p-4 text-center z-20">
+                <div class="w-12 h-12 bg-gradient-to-tr from-sky-500 via-indigo-500 to-amber-400 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(56,189,248,0.65)] mb-3">
+                    <svg class="w-6 h-6 text-slate-950 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                </div>
+                <h2 id="overlay-title" class="retro-font text-sm sm:text-base text-amber-300 mb-2 leading-snug drop-shadow-[0_2px_10px_rgba(251,191,36,0.45)]">
+                    TETRIS ARCADE
+                </h2>
+                <p id="overlay-desc" class="text-xs sm:text-sm text-sky-100/90 mb-4 leading-relaxed max-w-[220px]">
+                    Susun kiub &amp; penuhkan baris. Leret papan atau guna butang di bawah!
+                </p>
+                <button id="start-btn" onclick="window.startTetrisGame()" class="btn-3d retro-font bg-gradient-to-r from-amber-400 via-orange-400 to-pink-500 text-slate-950 font-extrabold px-5 py-3 rounded-xl text-xs cursor-pointer">
                     MULA MAIN
                 </button>
             </div>
         </div>
 
-        <!-- Panel Blok Seterusnya & Jeda -->
-        <div class="flex items-center justify-between w-full bg-slate-900/90 border border-purple-500/30 px-3 py-1 rounded-xl shadow-xl backdrop-blur-md">
-            <div class="flex items-center gap-1.5 py-0.5">
-                <span class="text-[7px] text-purple-300 font-bold uppercase mr-0.5">SETERUSNYA:</span>
-                <canvas id="nextCanvas1" width="30" height="25" class="bg-slate-950/80 rounded-lg border border-purple-500/30"></canvas>
-                <canvas id="nextCanvas2" width="25" height="20" class="bg-slate-950/60 rounded-lg border border-purple-500/20 opacity-80"></canvas>
-                <canvas id="nextCanvas3" width="20" height="15" class="bg-slate-950/40 rounded-lg border border-purple-500/10 opacity-50"></canvas>
-            </div>
-            
-            <div onclick="window.toggleGamePause()" class="flex flex-col items-center justify-center bg-indigo-950/90 border border-purple-500/40 px-2 py-0.5 rounded-lg cursor-pointer active:scale-95 shadow-inner">
-                <span id="pause-label" class="text-[6px] font-bold tracking-widest text-pink-300 uppercase">JEDA</span>
-                <svg class="w-3.5 h-3.5 text-pink-300" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            </div>
+        <!-- Panel Kawalan Sisi (Khusus Paparan Lanskap / Tablet) -->
+        <div class="hidden sm:flex flex-col justify-between h-full max-h-[420px] w-36 shrink-0 gap-2">
+            <button onclick="window.actionRotate()" class="btn-3d flex-1 bg-gradient-to-b from-purple-500 to-indigo-700 text-white rounded-2xl border border-purple-300/40 flex flex-col items-center justify-center gap-1 cursor-pointer">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+                <span class="text-xs font-extrabold tracking-wider">PUSING</span>
+            </button>
 
-            <div class="bg-indigo-950/80 border border-purple-500/30 px-2 py-0.5 rounded-lg text-center shadow-inner">
-                <span class="text-[6px] font-bold tracking-widest text-purple-300 block uppercase">TAHAP</span>
-                <span id="level" class="retro-font text-amber-300 text-[9px]">1/99</span>
-                <span id="next-level-info" class="text-[5px] text-purple-300/80 block">2,000 pts</span>
-            </div>
+            <button onclick="window.actionHardDrop()" class="btn-3d flex-1 bg-gradient-to-b from-amber-400 to-orange-600 text-slate-950 rounded-2xl border border-amber-200/50 flex flex-col items-center justify-center gap-1 cursor-pointer">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 13l-7 7-7-7m14-8l-7 7-7-7"/>
+                </svg>
+                <span class="text-xs font-extrabold tracking-wider">JATUH TERUS</span>
+            </button>
         </div>
     </main>
 
-    <!-- Bar Kawalan Bawah - Butang Besar & Selesa -->
-    <nav class="w-full max-w-sm px-1">
-        <div class="grid grid-cols-5 gap-1.5 bg-slate-900/95 p-1.5 rounded-2xl border border-purple-500/40 shadow-2xl backdrop-blur-md">
+    <!-- Bar Kawalan Bawah: Besar, Jelas & Selesa Untuk Ibu Jari -->
+    <nav class="w-full max-w-2xl shrink-0 z-20">
+        <div class="grid grid-cols-5 sm:grid-cols-3 gap-2 bg-slate-950/80 p-2 rounded-2xl border border-blue-400/30 backdrop-blur-md">
             <!-- Kiri -->
-            <button onclick="window.actionMove(-1)" class="flex flex-col items-center justify-center bg-gradient-to-b from-slate-800 to-slate-900 active:from-purple-600 active:to-indigo-600 text-purple-300 active:text-white py-3 rounded-xl border border-slate-700/80 shadow-lg active:scale-95 transition-all">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
+            <button onclick="window.actionMove(-1)" aria-label="Gerak Kiri" class="btn-3d bg-gradient-to-b from-blue-600 to-blue-800 text-white py-3.5 sm:py-3 rounded-xl border border-sky-300/30 flex items-center justify-center cursor-pointer">
+                <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                </svg>
             </button>
-            <!-- Pusing -->
-            <button onclick="window.actionRotate()" class="flex flex-col items-center justify-center bg-gradient-to-b from-purple-600 to-indigo-700 active:from-purple-500 text-white py-3 rounded-xl border border-purple-400/40 shadow-lg active:scale-95 transition-all">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+
+            <!-- Pusing (Telefon Potret) / Turun Perlahan (Lanskap) -->
+            <button onclick="window.actionRotate()" aria-label="Pusing Blok" class="sm:hidden btn-3d bg-gradient-to-b from-purple-500 to-indigo-700 text-white py-3.5 rounded-xl border border-purple-300/35 flex items-center justify-center cursor-pointer">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.8" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
             </button>
+
             <!-- Turun Perlahan (Soft Drop) -->
-            <button onclick="window.actionSoftDrop()" class="flex flex-col items-center justify-center bg-gradient-to-b from-slate-800 to-slate-900 active:from-indigo-600 text-indigo-300 active:text-white py-3 rounded-xl border border-indigo-700/60 shadow-lg active:scale-95 transition-all">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+            <button onclick="window.actionSoftDrop()" aria-label="Turun Perlahan" class="btn-3d bg-gradient-to-b from-cyan-600 to-blue-800 text-white py-3.5 sm:py-3 rounded-xl border border-cyan-300/30 flex items-center justify-center cursor-pointer">
+                <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                </svg>
             </button>
-            <!-- Jatuh Terus (Hard Drop - Kuning) -->
-            <button onclick="window.actionHardDrop()" class="flex flex-col items-center justify-center bg-gradient-to-b from-amber-500 to-orange-600 active:from-amber-400 text-white py-3 rounded-xl border border-amber-300/40 shadow-lg active:scale-95 transition-all">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="3.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 13l-7 7-7-7m14-8l-7 7-7-7"></path></svg>
+
+            <!-- Jatuh Terus (Telefon Potret) -->
+            <button onclick="window.actionHardDrop()" aria-label="Jatuh Terus" class="sm:hidden btn-3d bg-gradient-to-b from-amber-400 to-orange-600 text-slate-950 py-3.5 rounded-xl border border-amber-200/40 flex items-center justify-center cursor-pointer">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="3.2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 13l-7 7-7-7m14-8l-7 7-7-7"/>
+                </svg>
             </button>
+
             <!-- Kanan -->
-            <button onclick="window.actionMove(1)" class="flex flex-col items-center justify-center bg-gradient-to-b from-slate-800 to-slate-900 active:from-purple-600 text-purple-300 active:text-white py-3 rounded-xl border border-slate-700/80 shadow-lg active:scale-95 transition-all">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
+            <button onclick="window.actionMove(1)" aria-label="Gerak Kanan" class="btn-3d bg-gradient-to-b from-blue-600 to-blue-800 text-white py-3.5 sm:py-3 rounded-xl border border-sky-300/30 flex items-center justify-center cursor-pointer">
+                <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                </svg>
             </button>
         </div>
     </nav>
 
-    <!-- Skrip Permainan Tetris Penuh -->
     <script>
         (function() {
+            const COLS = 12;
+            const ROWS = 24;
+            const CELL = 25; // Kanvas 300x600 = 12x24 sel tepat
+
             let canvas, ctx;
             let nextCtx1, nextCtx2, nextCtx3;
             let arena = [];
             let queue = [];
-            let player = { pos: { x: 0, y: 0 }, matrix: null, score: 0, lines: 0, level: 1 };
+            let player = {
+                pos: { x: 0, y: 0 },
+                matrix: null,
+                score: 0,
+                lines: 0,
+                level: 1,
+                moves: 0,
+                combo: 0
+            };
+
             let isPlaying = false;
             let isPaused = false;
             let dropCounter = 0;
-            let dropInterval = 1000;
+            let dropInterval = 1100;
             let lastTime = 0;
             let animId = null;
 
@@ -140,9 +251,7 @@
                 try {
                     initAudio();
                     if (!audioCtx) return;
-                    if (audioCtx.state === 'suspended') {
-                        audioCtx.resume();
-                    }
+                    if (audioCtx.state === 'suspended') audioCtx.resume();
                     const osc = audioCtx.createOscillator();
                     const gain = audioCtx.createGain();
                     osc.connect(gain);
@@ -150,67 +259,64 @@
 
                     const now = audioCtx.currentTime;
                     if (type === 'move') {
-                        osc.type = 'square';
-                        osc.frequency.setValueAtTime(150, now);
-                        gain.gain.setValueAtTime(0.05, now);
-                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
-                        osc.start(now);
-                        osc.stop(now + 0.05);
-                    } else if (type === 'rotate') {
                         osc.type = 'triangle';
-                        osc.frequency.setValueAtTime(300, now);
-                        osc.frequency.exponentialRampToValueAtTime(500, now + 0.08);
+                        osc.frequency.setValueAtTime(180, now);
+                        gain.gain.setValueAtTime(0.05, now);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.045);
+                        osc.start(now); osc.stop(now + 0.045);
+                    } else if (type === 'rotate') {
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(340, now);
+                        osc.frequency.exponentialRampToValueAtTime(560, now + 0.07);
                         gain.gain.setValueAtTime(0.08, now);
-                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-                        osc.start(now);
-                        osc.stop(now + 0.08);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+                        osc.start(now); osc.stop(now + 0.07);
                     } else if (type === 'drop') {
                         osc.type = 'sawtooth';
-                        osc.frequency.setValueAtTime(220, now);
-                        osc.frequency.exponentialRampToValueAtTime(80, now + 0.12);
-                        gain.gain.setValueAtTime(0.1, now);
-                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-                        osc.start(now);
-                        osc.stop(now + 0.12);
+                        osc.frequency.setValueAtTime(240, now);
+                        osc.frequency.exponentialRampToValueAtTime(75, now + 0.11);
+                        gain.gain.setValueAtTime(0.09, now);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
+                        osc.start(now); osc.stop(now + 0.11);
                     } else if (type === 'clear') {
-                        osc.type = 'sine';
-                        osc.frequency.setValueAtTime(440, now);
-                        osc.frequency.setValueAtTime(660, now + 0.08);
-                        osc.frequency.setValueAtTime(880, now + 0.16);
-                        gain.gain.setValueAtTime(0.15, now);
-                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-                        osc.start(now);
-                        osc.stop(now + 0.3);
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(523.25, now);
+                        osc.frequency.setValueAtTime(659.25, now + 0.07);
+                        osc.frequency.setValueAtTime(783.99, now + 0.14);
+                        osc.frequency.setValueAtTime(1046.5, now + 0.21);
+                        gain.gain.setValueAtTime(0.14, now);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
+                        osc.start(now); osc.stop(now + 0.32);
                     }
-                } catch(e) {}
+                } catch (e) {}
             }
 
-            const colors = [
-                null,
-                '#ec4899', // T
-                '#06b6d4', // I
-                '#10b981', // S
-                '#a855f7', // Z
-                '#f97316', // L
-                '#eab308', // J
-                '#3b82f6', // O
-            ];
+            // Warna kiub cerah & berkilat lembut seperti dalam video
+            const pieceStyles = {
+                1: { fill: '#f97316', light: '#fdba74', dark: '#c2410c' }, // L - Jingga
+                2: { fill: '#facc15', light: '#fef08a', dark: '#ca8a04' }, // O - Kuning
+                3: { fill: '#f43f5e', light: '#fda4af', dark: '#be123c' }, // Z / S - Merah Jambu / Merah
+                4: { fill: '#22c55e', light: '#86efac', dark: '#15803d' }, // S - Hijau
+                5: { fill: '#a855f7', light: '#d8b4fe', dark: '#7e22ce' }, // T - Ungu
+                6: { fill: '#3b82f6', light: '#93c5fd', dark: '#1d4ed8' }, // J - Biru
+                7: { fill: '#06b6d4', light: '#67e8f9', dark: '#0e7490' }  // I - Sian
+            };
 
             function makeMatrix(w, h) {
-                const m = [];
-                while (h--) m.push(new Array(w).fill(0));
-                return m;
+                return Array.from({ length: h }, () => new Array(w).fill(0));
             }
 
             function getPiece(type) {
-                if (type === 'T') return [[0,1,0],[1,1,1],[0,0,0]];
-                if (type === 'I') return [[0,2,0,0],[0,2,0,0],[0,2,0,0],[0,2,0,0]];
-                if (type === 'S') return [[0,3,3],[3,3,0],[0,0,0]];
-                if (type === 'Z') return [[4,4,0],[0,4,4],[0,0,0]];
-                if (type === 'L') return [[0,5,0],[0,5,0],[0,5,5]];
-                if (type === 'J') return [[0,6,0],[0,6,0],[6,6,0]];
-                if (type === 'O') return [[7,7],[7,7]];
-                return [[1]];
+                switch (type) {
+                    case 'T': return [[0, 5, 0], [5, 5, 5], [0, 0, 0]];
+                    case 'I': return [[0, 7, 0, 0], [0, 7, 0, 0], [0, 7, 0, 0], [0, 7, 0, 0]];
+                    case 'S': return [[0, 4, 4], [4, 4, 0], [0, 0, 0]];
+                    case 'Z': return [[3, 3, 0], [0, 3, 3], [0, 0, 0]];
+                    case 'L': return [[0, 0, 1], [1, 1, 1], [0, 0, 0]];
+                    case 'J': return [[6, 0, 0], [6, 6, 6], [0, 0, 0]];
+                    case 'O': return [[2, 2], [2, 2]];
+                    default: return [[5]];
+                }
             }
 
             function randType() {
@@ -225,13 +331,15 @@
             }
 
             function initGameVars() {
-                arena = makeMatrix(15, 30);
+                arena = makeMatrix(COLS, ROWS);
                 queue = [];
                 refillQueue();
                 player.score = 0;
                 player.lines = 0;
                 player.level = 1;
-                dropInterval = 1200;
+                player.moves = 0;
+                player.combo = 0;
+                dropInterval = 1100;
             }
 
             function checkCollide(ar, pl) {
@@ -239,14 +347,10 @@
                 for (let y = 0; y < m.length; ++y) {
                     for (let x = 0; x < m[y].length; ++x) {
                         if (m[y][x] !== 0) {
-                            let newX = x + o.x;
-                            let newY = y + o.y;
-                            if (newX < 0 || newX >= ar[0].length || newY >= ar.length) {
-                                return true;
-                            }
-                            if (newY >= 0 && ar[newY][newX] !== 0) {
-                                return true;
-                            }
+                            const nx = x + o.x;
+                            const ny = y + o.y;
+                            if (nx < 0 || nx >= ar[0].length || ny >= ar.length) return true;
+                            if (ny >= 0 && ar[ny][nx] !== 0) return true;
                         }
                     }
                 }
@@ -257,12 +361,15 @@
                 player.matrix.forEach((row, y) => {
                     row.forEach((val, x) => {
                         if (val !== 0) {
-                            if (arena[y + player.pos.y] && arena[y + player.pos.y][x + player.pos.x] !== undefined) {
-                                arena[y + player.pos.y][x + player.pos.x] = val;
+                            const ay = y + player.pos.y;
+                            const ax = x + player.pos.x;
+                            if (arena[ay] && arena[ay][ax] !== undefined) {
+                                arena[ay][ax] = val;
                             }
                         }
                     });
                 });
+                player.moves += 1;
             }
 
             function rotateMatrix(m, dir) {
@@ -275,12 +382,22 @@
                 else m.reverse();
             }
 
+            function showComboBadge(comboCount) {
+                const badge = document.getElementById('combo-badge');
+                const num = document.getElementById('combo-num');
+                if (!badge || !num) return;
+                num.innerText = comboCount;
+                badge.classList.remove('hidden', 'combo-anim');
+                void badge.offsetWidth;
+                badge.classList.add('combo-anim');
+            }
+
             function resetPlayer() {
                 refillQueue();
                 const nextT = queue.shift();
                 player.matrix = getPiece(nextT);
                 player.pos.y = 0;
-                player.pos.x = (arena[0].length / 2 | 0) - (player.matrix[0].length / 2 | 0);
+                player.pos.x = ((COLS / 2) | 0) - ((player.matrix[0].length / 2) | 0);
 
                 if (checkCollide(arena, player)) {
                     triggerGameOver();
@@ -290,7 +407,7 @@
 
             function clearLines() {
                 let count = 0;
-                outer: for (let y = arena.length - 1; y > 0; --y) {
+                outer: for (let y = arena.length - 1; y >= 0; --y) {
                     for (let x = 0; x < arena[y].length; ++x) {
                         if (arena[y][x] === 0) continue outer;
                     }
@@ -299,30 +416,77 @@
                     ++y;
                     count++;
                 }
+
                 if (count > 0) {
+                    player.combo += 1;
                     playSound('clear');
-                    const pts = [0, 40, 100, 300, 1200];
-                    player.score += pts[count] * player.level;
+                    const basePts = [0, 100, 300, 600, 1000];
+                    const comboBonus = player.combo > 1 ? (player.combo - 1) * 75 : 0;
+                    player.score += (basePts[count] + comboBonus) * player.level;
                     player.lines += count;
-                    player.level = Math.min(99, Math.floor(player.lines / 8) + 1);
-                    dropInterval = Math.max(80, 1200 - (player.level - 1) * 11);
-                    updateScoreDisplay();
+                    player.level = Math.min(99, Math.floor(player.lines / 6) + 1);
+                    dropInterval = Math.max(110, 1100 - (player.level - 1) * 14);
+                    if (player.combo >= 1) {
+                        showComboBadge(player.combo);
+                    }
+                } else {
+                    player.combo = 0;
                 }
+                updateScoreDisplay();
             }
 
-            function drawBlock(matrix, offset, targetCtx) {
+            function drawRoundedRect(targetCtx, x, y, w, h, r) {
+                targetCtx.beginPath();
+                targetCtx.roundRect(x, y, w, h, r);
+            }
+
+            function drawSingleCube(targetCtx, gx, gy, val, cellSize) {
+                const st = pieceStyles[val] || pieceStyles[5];
+                const px = gx * cellSize;
+                const py = gy * cellSize;
+                const pad = Math.max(1, cellSize * 0.05);
+                const s = cellSize - pad * 2;
+                const r = Math.max(3, cellSize * 0.18);
+
+                // Badan kiub
+                drawRoundedRect(targetCtx, px + pad, py + pad, s, s, r);
+                targetCtx.fillStyle = st.fill;
+                targetCtx.fill();
+
+                // Sorotan atas & kiri (bevel lembut)
+                targetCtx.save();
+                drawRoundedRect(targetCtx, px + pad, py + pad, s, s, r);
+                targetCtx.clip();
+
+                targetCtx.fillStyle = st.light;
+                targetCtx.fillRect(px + pad, py + pad, s, Math.max(2, s * 0.18));
+                targetCtx.fillRect(px + pad, py + pad, Math.max(2, s * 0.16), s);
+
+                // Bayang bawah & kanan
+                targetCtx.fillStyle = st.dark;
+                targetCtx.fillRect(px + pad, py + pad + s - Math.max(2, s * 0.2), s, Math.max(2, s * 0.2));
+                targetCtx.fillRect(px + pad + s - Math.max(2, s * 0.18), py + pad, Math.max(2, s * 0.18), s);
+
+                // Kilauan kecil sudut atas kiri
+                targetCtx.fillStyle = 'rgba(255,255,255,0.45)';
+                targetCtx.beginPath();
+                targetCtx.arc(px + pad + s * 0.24, py + pad + s * 0.24, Math.max(1.2, s * 0.08), 0, Math.PI * 2);
+                targetCtx.fill();
+                targetCtx.restore();
+
+                // Garis tepi halus
+                drawRoundedRect(targetCtx, px + pad, py + pad, s, s, r);
+                targetCtx.strokeStyle = 'rgba(15, 23, 42, 0.45)';
+                targetCtx.lineWidth = 1.2;
+                targetCtx.stroke();
+            }
+
+            function drawBlock(matrix, offset, targetCtx, cellSize) {
                 if (!matrix || !targetCtx) return;
                 matrix.forEach((row, y) => {
                     row.forEach((val, x) => {
                         if (val !== 0) {
-                            const px = x + offset.x;
-                            const py = y + offset.y;
-                            const c = colors[val] || '#ec4899';
-                            targetCtx.fillStyle = c;
-                            targetCtx.fillRect(px, py, 1, 1);
-                            targetCtx.strokeStyle = 'rgba(0,0,0,0.5)';
-                            targetCtx.lineWidth = 0.05;
-                            targetCtx.strokeRect(px, py, 1, 1);
+                            drawSingleCube(targetCtx, x + offset.x, y + offset.y, val, cellSize);
                         }
                     });
                 });
@@ -330,17 +494,72 @@
 
             function drawGhost() {
                 if (!player.matrix || !ctx) return;
-                const ghost = { pos: { x: player.pos.x, y: player.pos.y }, matrix: player.matrix };
+                const ghost = {
+                    pos: { x: player.pos.x, y: player.pos.y },
+                    matrix: player.matrix
+                };
                 while (!checkCollide(arena, ghost)) {
                     ghost.pos.y++;
                 }
                 ghost.pos.y--;
 
+                if (ghost.pos.y <= player.pos.y) return;
+
                 player.matrix.forEach((row, y) => {
                     row.forEach((val, x) => {
                         if (val !== 0) {
-                            ctx.fillStyle = 'rgba(255,255,255,0.12)';
-                            ctx.fillRect(x + ghost.pos.x, y + ghost.pos.y, 1, 1);
+                            const gx = (x + ghost.pos.x) * CELL;
+                            const gy = (y + ghost.pos.y) * CELL;
+                            const pad = 2;
+                            const s = CELL - pad * 2;
+                            ctx.save();
+                            drawRoundedRect(ctx, gx + pad, gy + pad, s, s, 5);
+                            ctx.fillStyle = 'rgba(147, 197, 253, 0.12)';
+                            ctx.fill();
+                            ctx.strokeStyle = 'rgba(186, 230, 253, 0.45)';
+                            ctx.lineWidth = 1.5;
+                            ctx.setLineDash([4, 3]);
+                            ctx.stroke();
+                            ctx.restore();
+                        }
+                    });
+                });
+            }
+
+            function drawPreviewOnCanvas(targetCtx, pieceType, cellSize) {
+                if (!targetCtx) return;
+                const w = targetCtx.canvas.width;
+                const h = targetCtx.canvas.height;
+                targetCtx.clearRect(0, 0, w, h);
+
+                const m = getPiece(pieceType);
+                // Cari batas kiub sebenar supaya berada betul-betul di tengah
+                let minX = m[0].length, maxX = -1, minY = m.length, maxY = -1;
+                m.forEach((row, y) => {
+                    row.forEach((val, x) => {
+                        if (val !== 0) {
+                            if (x < minX) minX = x;
+                            if (x > maxX) maxX = x;
+                            if (y < minY) minY = y;
+                            if (y > maxY) maxY = y;
+                        }
+                    });
+                });
+                const pw = (maxX - minX + 1) * cellSize;
+                const ph = (maxY - minY + 1) * cellSize;
+                const startX = (w - pw) / 2 - minX * cellSize;
+                const startY = (h - ph) / 2 - minY * cellSize;
+
+                m.forEach((row, y) => {
+                    row.forEach((val, x) => {
+                        if (val !== 0) {
+                            drawSingleCube(
+                                targetCtx,
+                                startX / cellSize + x,
+                                startY / cellSize + y,
+                                val,
+                                cellSize
+                            );
                         }
                     });
                 });
@@ -348,41 +567,35 @@
 
             function drawQueuePreviews() {
                 if (queue.length < 3) refillQueue();
-                if (nextCtx1) {
-                    nextCtx1.fillStyle = '#09090b';
-                    nextCtx1.fillRect(0, 0, nextCtx1.canvas.width, nextCtx1.canvas.height);
-                    drawBlock(getPiece(queue[0]), { x: 0.5, y: 0.3 }, nextCtx1);
-                }
-                if (nextCtx2) {
-                    nextCtx2.fillStyle = '#09090b';
-                    nextCtx2.fillRect(0, 0, nextCtx2.canvas.width, nextCtx2.canvas.height);
-                    drawBlock(getPiece(queue[1]), { x: 0.4, y: 0.2 }, nextCtx2);
-                }
-                if (nextCtx3) {
-                    nextCtx3.fillStyle = '#09090b';
-                    nextCtx3.fillRect(0, 0, nextCtx3.canvas.width, nextCtx3.canvas.height);
-                    drawBlock(getPiece(queue[2]), { x: 0.2, y: 0.1 }, nextCtx3);
-                }
+                drawPreviewOnCanvas(nextCtx1, queue[0], 15);
+                drawPreviewOnCanvas(nextCtx2, queue[1], 11);
+                drawPreviewOnCanvas(nextCtx3, queue[2], 9);
             }
 
             function renderScene() {
                 if (!ctx || !canvas) return;
-                ctx.fillStyle = '#09090b';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                ctx.strokeStyle = 'rgba(168, 85, 247, 0.15)';
-                ctx.lineWidth = 0.04;
-                for (let i = 0; i <= canvas.width / 12; i++) {
-                    ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height / 12); ctx.stroke();
+                // Garis grid halus pada kanvas
+                ctx.strokeStyle = 'rgba(96, 165, 250, 0.14)';
+                ctx.lineWidth = 1;
+                for (let x = 0; x <= COLS; x++) {
+                    ctx.beginPath();
+                    ctx.moveTo(x * CELL, 0);
+                    ctx.lineTo(x * CELL, ROWS * CELL);
+                    ctx.stroke();
                 }
-                for (let j = 0; j <= canvas.height / 12; j++) {
-                    ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(canvas.width / 12, j); ctx.stroke();
+                for (let y = 0; y <= ROWS; y++) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, y * CELL);
+                    ctx.lineTo(COLS * CELL, y * CELL);
+                    ctx.stroke();
                 }
 
-                drawBlock(arena, { x: 0, y: 0 }, ctx);
+                drawBlock(arena, { x: 0, y: 0 }, ctx, CELL);
                 if (isPlaying && player.matrix) {
                     drawGhost();
-                    drawBlock(player.matrix, player.pos, ctx);
+                    drawBlock(player.matrix, player.pos, ctx, CELL);
                 }
             }
 
@@ -414,24 +627,31 @@
                 const sEl = document.getElementById('score-text');
                 const lEl = document.getElementById('level');
                 const bEl = document.getElementById('progress-bar');
+                const pEl = document.getElementById('progress-pct');
                 const nxtInfo = document.getElementById('next-level-info');
-                
-                if (sEl) sEl.innerText = `Skor: ${player.score}`;
-                if (lEl) lEl.innerText = `${player.level}/99`;
-                
-                const remaining = Math.max(0, 2000 - player.score);
-                if (nxtInfo) {
-                    if (player.score >= 2000) {
-                        nxtInfo.innerText = "SASARAN CAPAI!";
-                        nxtInfo.classList.add("text-emerald-400");
-                    } else {
-                        nxtInfo.innerText = `Lagi ${remaining} pts`;
-                    }
-                }
+                const movesEl = document.getElementById('moves-count');
+                const linesEl = document.getElementById('lines-count');
 
-                if (bEl) {
-                    const pct = Math.min(100, (player.score / 2000) * 100);
-                    bEl.style.width = pct + '%';
+                if (sEl) sEl.innerText = `Skor: ${player.score.toLocaleString()}`;
+                if (lEl) lEl.innerText = `${player.level}/99`;
+                if (movesEl) movesEl.innerText = `${player.moves}`;
+                if (linesEl) linesEl.innerText = `${player.lines} Baris`;
+
+                const target = 2000;
+                const remaining = Math.max(0, target - player.score);
+                const pct = Math.min(100, Math.round((player.score / target) * 100));
+
+                if (pEl) pEl.innerText = `${pct}%`;
+                if (bEl) bEl.style.width = `${pct}%`;
+
+                if (nxtInfo) {
+                    if (player.score >= target) {
+                        nxtInfo.innerText = 'SASARAN CAPAI!';
+                        nxtInfo.className = 'text-[10px] font-bold text-emerald-300';
+                    } else {
+                        nxtInfo.innerText = `Lagi ${remaining.toLocaleString()} pts`;
+                        nxtInfo.className = 'text-[10px] font-semibold text-cyan-200';
+                    }
                 }
             }
 
@@ -441,7 +661,9 @@
                 const overlay = document.getElementById('game-overlay');
                 if (overlay) {
                     document.getElementById('overlay-title').innerText = 'TAMAT PERMAINAN';
-                    document.getElementById('overlay-desc').innerHTML = `Skor Akhir: <strong class="text-pink-400 text-sm">${player.score}</strong><br>Tahap: <strong class="text-amber-300">${player.level}</strong>`;
+                    document.getElementById('overlay-desc').innerHTML =
+                        `Skor Akhir: <strong class="text-amber-300">${player.score.toLocaleString()}</strong><br>` +
+                        `Tahap: <strong class="text-cyan-300">${player.level}</strong> • Baris: <strong class="text-emerald-300">${player.lines}</strong>`;
                     document.getElementById('start-btn').innerText = 'MAIN SEMULA';
                     overlay.classList.remove('hidden');
                 }
@@ -452,6 +674,8 @@
                 initGameVars();
                 isPlaying = true;
                 isPaused = false;
+                const label = document.getElementById('pause-label');
+                if (label) label.innerText = 'Jeda';
                 const overlay = document.getElementById('game-overlay');
                 if (overlay) overlay.classList.add('hidden');
                 resetPlayer();
@@ -465,12 +689,15 @@
                 if (!isPlaying) return;
                 isPaused = !isPaused;
                 const overlay = document.getElementById('game-overlay');
+                const label = document.getElementById('pause-label');
                 if (isPaused) {
-                    document.getElementById('overlay-title').innerText = 'PERMAINAN DIJEDA';
-                    document.getElementById('overlay-desc').innerHTML = `Skor Semasa: <strong class="text-pink-400 text-sm">${player.score}</strong>`;
+                    if (label) label.innerText = 'Main';
+                    document.getElementById('overlay-title').innerText = 'DIJEDA';
+                    document.getElementById('overlay-desc').innerHTML = `Skor Semasa: <strong class="text-amber-300 text-base">${player.score.toLocaleString()}</strong>`;
                     document.getElementById('start-btn').innerText = 'SAMBUNG MAIN';
                     if (overlay) overlay.classList.remove('hidden');
                 } else {
+                    if (label) label.innerText = 'Jeda';
                     if (overlay) overlay.classList.add('hidden');
                     lastTime = performance.now();
                     gameLoop();
@@ -478,40 +705,43 @@
             };
 
             window.actionMove = function(dir) {
-                if (!isPlaying || isPaused) return;
+                if (!isPlaying || isPaused || !player.matrix) return;
                 player.pos.x += dir;
                 if (checkCollide(arena, player)) {
                     player.pos.x -= dir;
                 } else {
                     playSound('move');
+                    renderScene();
                 }
             };
 
             window.actionRotate = function() {
-                if (!isPlaying || isPaused) return;
+                if (!isPlaying || isPaused || !player.matrix) return;
                 const px = player.pos.x;
                 let offset = 1;
                 rotateMatrix(player.matrix, 1);
                 while (checkCollide(arena, player)) {
                     player.pos.x += offset;
                     offset = -(offset + (offset > 0 ? 1 : -1));
-                    if (offset > player.matrix[0].length) {
+                    if (Math.abs(offset) > player.matrix[0].length) {
                         rotateMatrix(player.matrix, -1);
                         player.pos.x = px;
                         return;
                     }
                 }
                 playSound('rotate');
+                renderScene();
             };
 
             window.actionSoftDrop = function() {
-                if (!isPlaying || isPaused) return;
+                if (!isPlaying || isPaused || !player.matrix) return;
                 playerDropStep();
                 playSound('move');
+                renderScene();
             };
 
             window.actionHardDrop = function() {
-                if (!isPlaying || isPaused) return;
+                if (!isPlaying || isPaused || !player.matrix) return;
                 while (!checkCollide(arena, player)) {
                     player.pos.y++;
                 }
@@ -522,25 +752,86 @@
                 updateScoreDisplay();
                 dropCounter = 0;
                 playSound('drop');
+                renderScene();
             };
 
-            window.addEventListener('keydown', e => {
+            // Kawalan leret sentuh (swipe) terus pada papan permainan untuk telefon
+            function setupTouchGestures() {
+                if (!canvas) return;
+                let touchStartX = 0;
+                let touchStartY = 0;
+                let lastStepX = 0;
+                let lastStepY = 0;
+                let moved = false;
+
+                canvas.addEventListener('touchstart', (e) => {
+                    if (!isPlaying || isPaused) return;
+                    const t = e.touches[0];
+                    touchStartX = t.clientX;
+                    touchStartY = t.clientY;
+                    lastStepX = 0;
+                    lastStepY = 0;
+                    moved = false;
+                }, { passive: true });
+
+                canvas.addEventListener('touchmove', (e) => {
+                    if (!isPlaying || isPaused) return;
+                    const t = e.touches[0];
+                    const dx = t.clientX - touchStartX;
+                    const dy = t.clientY - touchStartY;
+                    const stepSize = 26;
+
+                    const stepsX = Math.trunc(dx / stepSize);
+                    if (stepsX !== lastStepX) {
+                        const diff = stepsX - lastStepX;
+                        const dir = diff > 0 ? 1 : -1;
+                        for (let i = 0; i < Math.abs(diff); i++) {
+                            window.actionMove(dir);
+                        }
+                        lastStepX = stepsX;
+                        moved = true;
+                    }
+
+                    const stepsY = Math.trunc(dy / stepSize);
+                    if (stepsY > lastStepY) {
+                        const diffY = stepsY - lastStepY;
+                        for (let i = 0; i < diffY; i++) {
+                            window.actionSoftDrop();
+                        }
+                        lastStepY = stepsY;
+                        moved = true;
+                    }
+                }, { passive: true });
+
+                canvas.addEventListener('touchend', (e) => {
+                    if (!isPlaying || isPaused) return;
+                    const t = e.changedTouches[0];
+                    const dy = t.clientY - touchStartY;
+                    if (!moved && Math.abs(t.clientX - touchStartX) < 12 && Math.abs(dy) < 12) {
+                        window.actionRotate();
+                    } else if (dy > 95 && Math.abs(lastStepX) === 0) {
+                        window.actionHardDrop();
+                    }
+                }, { passive: true });
+            }
+
+            window.addEventListener('keydown', (e) => {
                 if (!isPlaying || isPaused) return;
-                if (e.key === 'ArrowLeft') window.actionMove(-1);
-                else if (e.key === 'ArrowRight') window.actionMove(1);
-                else if (e.key === 'ArrowDown') window.actionSoftDrop();
-                else if (e.key === 'ArrowUp') window.actionRotate();
-                else if (e.key === ' ') { e.preventDefault(); window.actionHardDrop(); }
+                if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') window.actionMove(-1);
+                else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') window.actionMove(1);
+                else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') window.actionSoftDrop();
+                else if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') window.actionRotate();
+                else if (e.key === ' ') {
+                    e.preventDefault();
+                    window.actionHardDrop();
+                } else if (e.key === 'p' || e.key === 'P' || e.key === 'Escape') {
+                    window.toggleGamePause();
+                }
             });
 
             window.addEventListener('DOMContentLoaded', () => {
                 canvas = document.getElementById('tetris');
-                if (canvas) {
-                    ctx = canvas.getContext('2d');
-                }
-                if (ctx) {
-                    ctx.scale(12, 12); // Memastikan skala padan sepenuhnya dengan saiz fizikal kanvas 180x360
-                }
+                if (canvas) ctx = canvas.getContext('2d');
 
                 const c1 = document.getElementById('nextCanvas1');
                 const c2 = document.getElementById('nextCanvas2');
@@ -549,13 +840,13 @@
                 if (c2) nextCtx2 = c2.getContext('2d');
                 if (c3) nextCtx3 = c3.getContext('2d');
 
-                if (nextCtx1) nextCtx1.scale(10, 10);
-                if (nextCtx2) nextCtx2.scale(8, 8);
-                if (nextCtx3) nextCtx3.scale(6, 6);
-
-                arena = makeMatrix(15, 30);
+                arena = makeMatrix(COLS, ROWS);
                 refillQueue();
                 player.matrix = getPiece(queue[0]);
+                player.pos.x = ((COLS / 2) | 0) - ((player.matrix[0].length / 2) | 0);
+                drawQueuePreviews();
+                updateScoreDisplay();
+                setupTouchGestures();
                 renderScene();
             });
         })();
