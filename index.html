@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Tetris Arcade — Edisi Moden</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Chakra+Petch:wght@600;700&family=Inter:wght@500;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Chakra+Petch:wght@600;700;800&family=Inter:wght@500;700;800&display=swap" rel="stylesheet">
     <style>
         * {
             -webkit-tap-highlight-color: transparent;
@@ -45,11 +45,11 @@
             transition: transform 0.06s ease;
             box-shadow:
                 inset 0 2px 0 rgba(255, 255, 255, 0.35),
-                0 4px 0 rgba(5, 10, 28, 0.9),
-                0 6px 12px rgba(0, 0, 0, 0.45);
+                0 5px 0 rgba(5, 10, 28, 0.9),
+                0 7px 14px rgba(0, 0, 0, 0.45);
         }
         .btn-3d:active {
-            transform: translateY(3px);
+            transform: translateY(4px);
             box-shadow:
                 inset 0 2px 0 rgba(255, 255, 255, 0.2),
                 0 1px 0 rgba(5, 10, 28, 0.9),
@@ -66,137 +66,137 @@
         }
     </style>
 </head>
-<body class="flex flex-col items-center justify-between px-2.5 py-2 gap-1.5">
+<body class="flex flex-col items-center justify-between px-2 py-2 gap-1.5">
 
-    <!-- Bar Atas: Sasaran Skor, Kemajuan & Jeda -->
-    <header class="w-full max-w-md flex items-center justify-between gap-2 shrink-0 z-20">
-        <div class="panel-bevel flex-1 min-w-0 rounded-xl px-2.5 py-1.5 border border-blue-400/35 flex items-center justify-between gap-2.5">
+    <!-- Bar Atas: Sasaran Skor, Kemajuan & Rehat/Main -->
+    <header class="w-full max-w-xl flex items-center justify-between gap-2 shrink-0 z-20">
+        <div class="panel-bevel flex-1 min-w-0 rounded-xl px-3 py-2 border border-blue-400/35 flex items-center justify-between gap-3">
             <div class="flex flex-col shrink-0">
-                <span class="text-[10px] tracking-wider text-sky-300 font-bold uppercase">Sasaran</span>
-                <span id="target-score" class="retro-font text-xs text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]">2,000</span>
+                <span class="text-xs tracking-wide text-sky-300 font-extrabold uppercase">Sasaran</span>
+                <span id="target-score" class="retro-font text-sm text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]">2,000</span>
             </div>
 
             <div class="flex-1 min-w-0">
-                <div class="flex justify-between text-xs font-bold text-sky-100 mb-1">
+                <div class="flex justify-between text-xs sm:text-sm font-extrabold text-sky-100 mb-1">
                     <span id="score-text" class="truncate">Skor: 0</span>
                     <span id="progress-pct" class="text-amber-300 ml-1 shrink-0">0%</span>
                 </div>
-                <div class="w-full bg-slate-950/90 rounded-full h-2.5 overflow-hidden border border-blue-400/30 p-[1px]">
+                <div class="w-full bg-slate-950/90 rounded-full h-3 overflow-hidden border border-blue-400/30 p-[1px]">
                     <div id="progress-bar" class="bg-gradient-to-r from-cyan-400 via-pink-500 to-amber-400 h-full rounded-full w-0 transition-all duration-300"></div>
                 </div>
             </div>
         </div>
 
-        <button onclick="window.toggleGamePause()" aria-label="Jeda Permainan" class="btn-3d panel-bevel rounded-xl px-3 py-1.5 border border-blue-300/35 flex flex-col items-center justify-center shrink-0 cursor-pointer">
-            <svg class="w-5 h-5 text-amber-300" fill="currentColor" viewBox="0 0 24 24">
+        <button onclick="window.toggleGamePause()" aria-label="Rehat atau Main" class="btn-3d panel-bevel rounded-xl px-3.5 py-2 border border-blue-300/40 flex flex-col items-center justify-center shrink-0 cursor-pointer min-w-[68px]">
+            <svg id="pause-icon" class="w-6 h-6 text-amber-300" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M6 5h4v14H6zm8 0h4v14h-4z"/>
             </svg>
-            <span id="pause-label" class="text-[10px] font-bold tracking-wider text-sky-200 mt-0.5 uppercase">Jeda</span>
+            <span id="pause-label" class="text-xs font-extrabold tracking-wide text-sky-100 mt-0.5">Rehat</span>
         </button>
     </header>
 
-    <!-- Bar Info Ringkas: NEXT, TAHAP & GERAKAN -->
-    <section class="w-full max-w-md grid grid-cols-3 gap-1.5 shrink-0 z-20">
+    <!-- Bar Info Besar: NEXT, TAHAP & GERAKAN -->
+    <section class="w-full max-w-xl grid grid-cols-3 gap-2 shrink-0 z-20">
         <!-- NEXT -->
-        <div class="panel-bevel rounded-xl px-2 py-1 border border-blue-400/35 flex items-center justify-between gap-1">
+        <div class="panel-bevel rounded-xl px-2.5 py-1.5 border border-blue-400/35 flex items-center justify-between gap-1.5">
             <div class="flex flex-col">
-                <span class="retro-font text-[9px] text-amber-300 tracking-wider">NEXT</span>
-                <span class="text-[10px] text-sky-200 font-semibold">Seterusnya</span>
+                <span class="retro-font text-[10px] sm:text-xs text-amber-300 tracking-wider">NEXT</span>
+                <span class="text-xs text-sky-200 font-bold">Seterusnya</span>
             </div>
             <div class="flex items-center gap-1">
-                <canvas id="nextCanvas1" width="54" height="42" class="bg-slate-950/85 rounded-md border border-blue-400/30 w-11 h-8"></canvas>
-                <canvas id="nextCanvas2" width="38" height="30" class="bg-slate-950/65 rounded-md border border-blue-400/20 w-7 h-6 opacity-85"></canvas>
+                <canvas id="nextCanvas1" width="60" height="48" class="bg-slate-950/85 rounded-lg border border-blue-400/30 w-12 h-10"></canvas>
+                <canvas id="nextCanvas2" width="44" height="36" class="bg-slate-950/65 rounded-md border border-blue-400/20 w-9 h-7 opacity-85"></canvas>
             </div>
         </div>
 
         <!-- TAHAP -->
-        <div class="panel-bevel rounded-xl px-2 py-1 border border-blue-400/35 flex flex-col items-center justify-center text-center">
-            <span class="text-[10px] font-bold tracking-wider text-sky-300 uppercase">Tahap</span>
-            <span id="level" class="retro-font text-xs text-amber-300 leading-tight">1/99</span>
-            <span id="next-level-info" class="text-[10px] font-semibold text-cyan-200 leading-tight">Lagi 2,000 pts</span>
+        <div class="panel-bevel rounded-xl px-2.5 py-1.5 border border-blue-400/35 flex flex-col items-center justify-center text-center">
+            <span class="text-xs font-extrabold tracking-wider text-sky-300 uppercase">Tahap</span>
+            <span id="level" class="retro-font text-xs sm:text-sm text-amber-300 my-0.5">1/99</span>
+            <span id="next-level-info" class="text-xs font-bold text-cyan-200 leading-tight">Lagi 2,000 pts</span>
         </div>
 
         <!-- GERAKAN & BARIS -->
-        <div class="panel-bevel rounded-xl px-2 py-1 border border-blue-400/35 flex flex-col items-center justify-center text-center">
-            <span class="text-[10px] font-bold tracking-wider text-sky-300 uppercase">Gerakan</span>
-            <span id="moves-count" class="retro-font text-xs text-emerald-300 leading-tight">0</span>
-            <span id="lines-count" class="text-[10px] font-semibold text-sky-200 leading-tight">0 Baris</span>
+        <div class="panel-bevel rounded-xl px-2.5 py-1.5 border border-blue-400/35 flex flex-col items-center justify-center text-center">
+            <span class="text-xs font-extrabold tracking-wider text-sky-300 uppercase">Gerakan</span>
+            <span id="moves-count" class="retro-font text-xs sm:text-sm text-emerald-300 my-0.5">0</span>
+            <span id="lines-count" class="text-xs font-bold text-sky-200 leading-tight">0 Baris</span>
         </div>
     </section>
 
     <!-- Papan Permainan Utama -->
-    <main class="w-full max-w-md flex-1 min-h-0 flex items-center justify-center">
+    <main class="w-full max-w-xl flex-1 min-h-0 flex items-center justify-center">
         <div class="relative h-full max-h-full aspect-[10/18] flex items-center justify-center p-1.5 rounded-2xl bg-gradient-to-b from-blue-400/50 via-indigo-500/30 to-blue-900/60 shadow-[0_0_24px_rgba(37,99,235,0.4)] border border-sky-300/40">
             <canvas id="tetris" width="300" height="600" class="w-full h-full rounded-xl board-grid-bg shadow-inner block"></canvas>
 
             <!-- Pop-up COMBO -->
-            <div id="combo-badge" class="hidden combo-anim pointer-events-none absolute top-6 left-1/2 z-10 whitespace-nowrap">
-                <div class="px-3.5 py-1 rounded-full bg-gradient-to-r from-amber-400 via-orange-500 to-pink-500 text-slate-950 font-extrabold text-sm tracking-wider shadow-[0_0_18px_rgba(251,191,36,0.85)] border border-white/60">
+            <div id="combo-badge" class="hidden combo-anim pointer-events-none absolute top-7 left-1/2 z-10 whitespace-nowrap">
+                <div class="px-4 py-1.5 rounded-full bg-gradient-to-r from-amber-400 via-orange-500 to-pink-500 text-slate-950 font-extrabold text-sm sm:text-base tracking-wider shadow-[0_0_18px_rgba(251,191,36,0.85)] border border-white/60">
                     COMBO <span id="combo-num">1</span>x!
                 </div>
             </div>
 
-            <!-- Skrin Mula / Jeda / Tamat (Tulisan Besar & Jelas) -->
-            <div id="game-overlay" class="absolute inset-0 bg-slate-950/90 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center p-4 text-center z-20">
-                <div class="w-12 h-12 bg-gradient-to-tr from-sky-500 via-indigo-500 to-amber-400 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(56,189,248,0.65)] mb-3">
-                    <svg class="w-6 h-6 text-slate-950 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+            <!-- Skrin Mula / Rehat / Tamat -->
+            <div id="game-overlay" class="absolute inset-0 bg-slate-950/90 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center p-5 text-center z-20">
+                <div class="w-14 h-14 bg-gradient-to-tr from-sky-500 via-indigo-500 to-amber-400 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(56,189,248,0.65)] mb-3.5">
+                    <svg class="w-7 h-7 text-slate-950 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M8 5v14l11-7z"/>
                     </svg>
                 </div>
-                <h2 id="overlay-title" class="retro-font text-sm text-amber-300 mb-2.5 leading-relaxed drop-shadow-[0_2px_10px_rgba(251,191,36,0.45)]">
+                <h2 id="overlay-title" class="retro-font text-base sm:text-lg text-amber-300 mb-3 leading-relaxed drop-shadow-[0_2px_10px_rgba(251,191,36,0.45)]">
                     TETRIS ARCADE
                 </h2>
-                <p id="overlay-desc" class="text-sm text-sky-100 mb-4 leading-relaxed max-w-[240px] font-medium">
-                    Susun kiub &amp; penuhkan baris. Guna butang di bawah atau leret papan.
+                <p id="overlay-desc" class="text-sm sm:text-base text-sky-100 mb-5 leading-relaxed max-w-[260px] font-semibold">
+                    Susun kiub &amp; penuhkan baris. Tekan butang besar di bawah atau leret papan.
                 </p>
-                <button id="start-btn" onclick="window.startTetrisGame()" class="btn-3d retro-font bg-gradient-to-r from-amber-400 via-orange-400 to-pink-500 text-slate-950 font-extrabold px-5 py-3 rounded-xl text-xs cursor-pointer">
+                <button id="start-btn" onclick="window.startTetrisGame()" class="btn-3d retro-font bg-gradient-to-r from-amber-400 via-orange-400 to-pink-500 text-slate-950 font-extrabold px-6 py-3.5 rounded-xl text-xs sm:text-sm cursor-pointer">
                     MULA MAIN
                 </button>
             </div>
         </div>
     </main>
 
-    <!-- Bar Kawalan Bawah: Semua Butang Besar & Tersusun Di Bawah -->
-    <nav class="w-full max-w-md shrink-0 z-20">
-        <div class="grid grid-cols-5 gap-1.5 bg-slate-950/85 p-1.5 rounded-2xl border border-blue-400/35 backdrop-blur-md">
+    <!-- Bar Kawalan Bawah: Besar & Selesa Ditekan -->
+    <nav class="w-full max-w-xl shrink-0 z-20">
+        <div class="grid grid-cols-5 gap-2 bg-slate-950/85 p-2 rounded-2xl border border-blue-400/35 backdrop-blur-md">
             <!-- Kiri -->
-            <button onclick="window.actionMove(-1)" aria-label="Gerak Kiri" class="btn-3d bg-gradient-to-b from-blue-500 to-blue-700 text-white py-3 rounded-xl border border-sky-300/35 flex flex-col items-center justify-center cursor-pointer">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+            <button onclick="window.actionMove(-1)" aria-label="Gerak Kiri" class="btn-3d bg-gradient-to-b from-blue-500 to-blue-700 text-white py-3.5 sm:py-4 rounded-xl border border-sky-300/35 flex flex-col items-center justify-center cursor-pointer">
+                <svg class="w-7 h-7 sm:w-8 sm:h-8" fill="none" stroke="currentColor" stroke-width="3.2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
                 </svg>
-                <span class="text-[10px] font-bold tracking-wide mt-0.5">KIRI</span>
+                <span class="text-xs font-extrabold tracking-wide mt-1">KIRI</span>
             </button>
 
             <!-- Pusing -->
-            <button onclick="window.actionRotate()" aria-label="Pusing Blok" class="btn-3d bg-gradient-to-b from-purple-500 to-indigo-700 text-white py-3 rounded-xl border border-purple-300/40 flex flex-col items-center justify-center cursor-pointer">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.8" viewBox="0 0 24 24">
+            <button onclick="window.actionRotate()" aria-label="Pusing Blok" class="btn-3d bg-gradient-to-b from-purple-500 to-indigo-700 text-white py-3.5 sm:py-4 rounded-xl border border-purple-300/40 flex flex-col items-center justify-center cursor-pointer">
+                <svg class="w-7 h-7 sm:w-8 sm:h-8" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                 </svg>
-                <span class="text-[10px] font-bold tracking-wide mt-0.5">PUSING</span>
+                <span class="text-xs font-extrabold tracking-wide mt-1">PUSING</span>
             </button>
 
             <!-- Turun Perlahan -->
-            <button onclick="window.actionSoftDrop()" aria-label="Turun Perlahan" class="btn-3d bg-gradient-to-b from-cyan-500 to-blue-700 text-white py-3 rounded-xl border border-cyan-300/35 flex flex-col items-center justify-center cursor-pointer">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+            <button onclick="window.actionSoftDrop()" aria-label="Turun Perlahan" class="btn-3d bg-gradient-to-b from-cyan-500 to-blue-700 text-white py-3.5 sm:py-4 rounded-xl border border-cyan-300/35 flex flex-col items-center justify-center cursor-pointer">
+                <svg class="w-7 h-7 sm:w-8 sm:h-8" fill="none" stroke="currentColor" stroke-width="3.2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
                 </svg>
-                <span class="text-[10px] font-bold tracking-wide mt-0.5">TURUN</span>
+                <span class="text-xs font-extrabold tracking-wide mt-1">TURUN</span>
             </button>
 
             <!-- Jatuh Terus -->
-            <button onclick="window.actionHardDrop()" aria-label="Jatuh Terus" class="btn-3d bg-gradient-to-b from-amber-400 to-orange-600 text-slate-950 py-3 rounded-xl border border-amber-200/50 flex flex-col items-center justify-center cursor-pointer">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="3.2" viewBox="0 0 24 24">
+            <button onclick="window.actionHardDrop()" aria-label="Jatuh Terus" class="btn-3d bg-gradient-to-b from-amber-400 to-orange-600 text-slate-950 py-3.5 sm:py-4 rounded-xl border border-amber-200/50 flex flex-col items-center justify-center cursor-pointer">
+                <svg class="w-7 h-7 sm:w-8 sm:h-8" fill="none" stroke="currentColor" stroke-width="3.4" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 13l-7 7-7-7m14-8l-7 7-7-7"/>
                 </svg>
-                <span class="text-[10px] font-extrabold tracking-wide mt-0.5">DROPP</span>
+                <span class="text-xs font-extrabold tracking-wide mt-1">DROPP</span>
             </button>
 
             <!-- Kanan -->
-            <button onclick="window.actionMove(1)" aria-label="Gerak Kanan" class="btn-3d bg-gradient-to-b from-blue-500 to-blue-700 text-white py-3 rounded-xl border border-sky-300/35 flex flex-col items-center justify-center cursor-pointer">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+            <button onclick="window.actionMove(1)" aria-label="Gerak Kanan" class="btn-3d bg-gradient-to-b from-blue-500 to-blue-700 text-white py-3.5 sm:py-4 rounded-xl border border-sky-300/35 flex flex-col items-center justify-center cursor-pointer">
+                <svg class="w-7 h-7 sm:w-8 sm:h-8" fill="none" stroke="currentColor" stroke-width="3.2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
                 </svg>
-                <span class="text-[10px] font-bold tracking-wide mt-0.5">KANAN</span>
+                <span class="text-xs font-extrabold tracking-wide mt-1">KANAN</span>
             </button>
         </div>
     </nav>
@@ -546,8 +546,8 @@
 
             function drawQueuePreviews() {
                 if (queue.length < 2) refillQueue();
-                drawPreviewOnCanvas(nextCtx1, queue[0], 11);
-                drawPreviewOnCanvas(nextCtx2, queue[1], 8);
+                drawPreviewOnCanvas(nextCtx1, queue[0], 12);
+                drawPreviewOnCanvas(nextCtx2, queue[1], 9);
             }
 
             function renderScene() {
@@ -624,22 +624,34 @@
                 if (nxtInfo) {
                     if (player.score >= target) {
                         nxtInfo.innerText = 'SASARAN CAPAI!';
-                        nxtInfo.className = 'text-[10px] font-bold text-emerald-300 leading-tight';
+                        nxtInfo.className = 'text-xs font-extrabold text-emerald-300 leading-tight';
                     } else {
                         nxtInfo.innerText = `Lagi ${remaining.toLocaleString()} pts`;
-                        nxtInfo.className = 'text-[10px] font-semibold text-cyan-200 leading-tight';
+                        nxtInfo.className = 'text-xs font-bold text-cyan-200 leading-tight';
                     }
+                }
+            }
+
+            function setPauseButtonState(pausedState) {
+                const label = document.getElementById('pause-label');
+                const icon = document.getElementById('pause-icon');
+                if (label) label.innerText = pausedState ? 'Main' : 'Rehat';
+                if (icon) {
+                    icon.innerHTML = pausedState
+                        ? '<path d="M8 5v14l11-7z"/>'
+                        : '<path d="M6 5h4v14H6zm8 0h4v14h-4z"/>';
                 }
             }
 
             function triggerGameOver() {
                 isPlaying = false;
                 if (animId) cancelAnimationFrame(animId);
+                setPauseButtonState(false);
                 const overlay = document.getElementById('game-overlay');
                 if (overlay) {
                     document.getElementById('overlay-title').innerText = 'TAMAT PERMAINAN';
                     document.getElementById('overlay-desc').innerHTML =
-                        `Skor Akhir: <strong class="text-amber-300 text-base">${player.score.toLocaleString()}</strong><br>` +
+                        `Skor Akhir: <strong class="text-amber-300 text-lg">${player.score.toLocaleString()}</strong><br>` +
                         `Tahap: <strong class="text-cyan-300">${player.level}</strong> • Baris: <strong class="text-emerald-300">${player.lines}</strong>`;
                     document.getElementById('start-btn').innerText = 'MAIN SEMULA';
                     overlay.classList.remove('hidden');
@@ -651,8 +663,7 @@
                 initGameVars();
                 isPlaying = true;
                 isPaused = false;
-                const label = document.getElementById('pause-label');
-                if (label) label.innerText = 'Jeda';
+                setPauseButtonState(false);
                 const overlay = document.getElementById('game-overlay');
                 if (overlay) overlay.classList.add('hidden');
                 resetPlayer();
@@ -665,16 +676,14 @@
             window.toggleGamePause = function() {
                 if (!isPlaying) return;
                 isPaused = !isPaused;
+                setPauseButtonState(isPaused);
                 const overlay = document.getElementById('game-overlay');
-                const label = document.getElementById('pause-label');
                 if (isPaused) {
-                    if (label) label.innerText = 'Main';
-                    document.getElementById('overlay-title').innerText = 'DIJEDA';
-                    document.getElementById('overlay-desc').innerHTML = `Skor Semasa: <strong class="text-amber-300 text-base">${player.score.toLocaleString()}</strong>`;
+                    document.getElementById('overlay-title').innerText = 'REHAT';
+                    document.getElementById('overlay-desc').innerHTML = `Skor Semasa: <strong class="text-amber-300 text-lg">${player.score.toLocaleString()}</strong>`;
                     document.getElementById('start-btn').innerText = 'SAMBUNG MAIN';
                     if (overlay) overlay.classList.remove('hidden');
                 } else {
-                    if (label) label.innerText = 'Jeda';
                     if (overlay) overlay.classList.add('hidden');
                     lastTime = performance.now();
                     gameLoop();
